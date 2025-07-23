@@ -1,15 +1,16 @@
 {
   "manifest_version": 3,
-  "name": "TabNeat",
+  "name": "SessionVault",
   "version": "1.4.0",
-  "description": "Automatically sorts and groups your tabs by domain for a cleaner browser experience",
+  "description": "Powerful session management extension - Backup, restore, and organize your browsing sessions with smart tab grouping",
   "permissions": [
     "offscreen",
     "tabs",
     "storage",
     "tabGroups",
     "system.display",
-    "topSites"
+    "topSites",
+    "search"
   ],
   "chrome_url_overrides": {
     "newtab": "newtab.html"

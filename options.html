@@ -3,469 +3,533 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tab Neat Options</title>
+    <title>SessionVault Options</title>
     <style>
-        html, body {
-            height: 100%;
+        :root {
+            /* Light theme */
+            --bg-color: #ffffff;
+            --bg-secondary: #f7f6f3;
+            --bg-tertiary: #f1f1ef;
+            --text-primary: #37352f;
+            --text-secondary: #787774;
+            --text-tertiary: #9b9a97;
+            --border-color: #e9e9e7;
+            --hover-bg: #f1f1ef;
+            --accent-color: #2383e2;
+            --accent-hover: #1976d2;
+            --success-color: #0f7b0f;
+            --warning-color: #b95000;
+            --shadow: 0 1px 3px rgba(15, 15, 15, 0.1);
+            --shadow-hover: 0 2px 8px rgba(15, 15, 15, 0.15);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                /* Dark theme */
+                --bg-color: #191919;
+                --bg-secondary: #202020;
+                --bg-tertiary: #2a2a2a;
+                --text-primary: #ffffff;
+                --text-secondary: #9b9a97;
+                --text-tertiary: #6f6e69;
+                --border-color: #373737;
+                --hover-bg: #2a2a2a;
+                --accent-color: #5199ff;
+                --accent-hover: #4a8cff;
+                --success-color: #448361;
+                --warning-color: #d9730d;
+                --shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+                --shadow-hover: 0 2px 8px rgba(0, 0, 0, 0.4);
+            }
+        }
+
+        * {
             margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: #f0f0f0;
+            padding: 0;
+            box-sizing: border-box;
         }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+            transition: all 0.2s ease;
+        }
+
         .container {
-            font-family: Arial, sans-serif;
-            max-width: 300px;
-            width: 100%;
-            padding: 20px;
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 60px 40px;
+            min-height: 100vh;
+        }
+
+        .header {
             text-align: center;
-            background-color: #f9f9f9;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 48px;
         }
-        h2 {
-            color: #333;
-            margin-bottom: 20px;
+
+        .header h1 {
+            font-size: 32px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 12px;
         }
-        .toggle-container {
+
+        .header p {
+            font-size: 16px;
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+
+        .section {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 32px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow);
+            transition: all 0.2s ease;
+        }
+
+        .section:hover {
+            box-shadow: var(--shadow-hover);
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-description {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+
+        .setting-group {
+            margin-bottom: 24px;
+        }
+
+        .setting-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .setting-item {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin: 15px 0;
-            width: 100%;
-            padding: 0 10px;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border-color);
         }
-        .toggle-label {
+
+        .setting-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .setting-item:first-child {
+            padding-top: 0;
+        }
+
+        .setting-label {
+            flex: 1;
+        }
+
+        .setting-title {
             font-size: 16px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 4px;
         }
+
+        .setting-subtitle {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        /* Notion-style Toggle Switch */
         .toggle-switch {
             position: relative;
-            width: 50px;
+            width: 44px;
             height: 24px;
-        }
-        .toggle-switch input {
-            display: none;
-        }
-        .toggle-slider {
-            position: absolute;
+            background: var(--border-color);
+            border-radius: 12px;
             cursor: pointer;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-color: #ffcc00;
-            border-radius: 24px;
-            transition: 0.4s;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
         }
-        .toggle-slider:before {
+
+        .toggle-switch.active {
+            background: var(--accent-color);
+        }
+
+        .toggle-switch::before {
+            content: '';
             position: absolute;
-            content: "";
-            height: 18px; width: 18px;
-            left: 3px; bottom: 3px;
-            background-color: white;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: white;
             border-radius: 50%;
-            transition: 0.4s;
-        }
-        input:checked + .toggle-slider {
-            background-color: #ff6699;
-        }
-        input:checked + .toggle-slider:before {
-            transform: translateX(26px);
-        }
-        .footer {
-            margin-top: auto;
-            width: 100%;
-            padding: 10px;
-            background-color: #f9f9f9;
-            color: #333;
-            border-top: 1px solid #ddd;
-            text-align: center;
-            font-size: 12px;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
         }
 
-        .option-section {
-            margin: 20px 0;
-            padding: 15px;
-            background-color: #ffffff;
-            border-radius: 8px;
-            border: 1px solid #e0e0e0;
+        .toggle-switch.active::before {
+            transform: translateX(20px);
         }
 
-        .option-section h3 {
-            margin: 0 0 15px 0;
-            font-size: 16px;
-            color: #333;
+        .toggle-switch:hover {
+            background: var(--hover-bg);
         }
 
-        .sort-container {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+        .toggle-switch.active:hover {
+            background: var(--accent-hover);
         }
 
-        .sort-option {
-            display: flex;
-            align-items: center;
-            cursor: pointer;
-            padding: 8px;
-            border-radius: 4px;
-            transition: background-color 0.2s;
-        }
-
-        .sort-option:hover {
-            background-color: #f5f5f5;
-        }
-
-        .sort-option input[type="radio"] {
-            margin-right: 10px;
-        }
-
-        .radio-label {
-            font-size: 14px;
-            color: #333;
-        }
-
-        .custom-order-section {
-            margin-top: 15px;
-            padding: 15px;
-            background-color: #f8f9fa;
-            border-radius: 6px;
-            border: 1px dashed #ccc;
-        }
-
-        .custom-order-section h4 {
-            margin: 0 0 10px 0;
-            font-size: 14px;
-            color: #555;
-        }
-
-        .domain-list {
-            max-height: 200px;
-            overflow-y: auto;
-            margin-bottom: 10px;
-        }
-
-        .domain-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 8px 12px;
-            margin: 4px 0;
-            background-color: white;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            cursor: move;
-        }
-
-        .domain-item:hover {
-            background-color: #f0f0f0;
-        }
-
-        .domain-name {
-            font-size: 13px;
-            color: #333;
-        }
-
-        .drag-handle {
-            font-size: 12px;
-            color: #999;
-            cursor: grab;
-        }
-
-        .drag-handle:active {
-            cursor: grabbing;
-        }
-
-        .reset-btn {
-            padding: 6px 12px;
-            background-color: #6c757d;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            font-size: 12px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-
-        .reset-btn:hover {
-            background-color: #5a6268;
-        }
-
-        /* Auto Save Options Styles */
-        .auto-save-trigger-section {
-            margin: 20px 0;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            border: 1px solid #e0e0e0;
-        }
-
+        /* Radio Group */
         .radio-group {
             display: flex;
-            gap: 20px;
-            margin: 10px 0;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 16px;
         }
 
         .radio-option {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 12px;
+            padding: 12px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 14px;
+            transition: all 0.2s ease;
         }
 
-        .radio-option input[type="radio"] {
-            margin: 0;
-            accent-color: #007bff;
+        .radio-option:hover {
+            background: var(--hover-bg);
+            border-color: var(--accent-color);
+        }
+
+        .radio-option.selected {
+            background: var(--bg-tertiary);
+            border-color: var(--accent-color);
+        }
+
+        .radio-button {
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 50%;
+            position: relative;
+            transition: all 0.2s ease;
+        }
+
+        .radio-option.selected .radio-button {
+            border-color: var(--accent-color);
+        }
+
+        .radio-option.selected .radio-button::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 6px;
+            height: 6px;
+            background: var(--accent-color);
+            border-radius: 50%;
         }
 
         .radio-label {
-            color: #333;
+            font-size: 15px;
+            color: var(--text-primary);
+            font-weight: 500;
         }
 
-        .time-interval-section, .change-detection-section {
-            margin: 15px 0;
-            padding: 10px;
-            background: white;
-            border-radius: 6px;
-            border: 1px solid #e8e8e8;
+        .radio-description {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: 2px;
         }
 
-        .interval-select {
+        /* Select Dropdown */
+        .select-container {
+            margin-top: 16px;
+        }
+
+        .select-wrapper {
+            position: relative;
+        }
+
+        .select {
             width: 100%;
-            padding: 8px 12px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 14px;
-            background: white;
+            padding: 12px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--bg-color);
+            color: var(--text-primary);
+            font-size: 15px;
+            cursor: pointer;
+            appearance: none;
+            transition: all 0.2s ease;
         }
 
-        .interval-select:focus {
+        .select:hover {
+            border-color: var(--accent-color);
+        }
+
+        .select:focus {
             outline: none;
-            border-color: #007bff;
-            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2);
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(35, 131, 226, 0.1);
         }
 
-        .change-options {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
+        .select-wrapper::after {
+            content: '▼';
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-tertiary);
+            pointer-events: none;
+            font-size: 12px;
         }
 
-        .checkbox-option {
+        /* Checkbox Group */
+        .checkbox-group {
+            margin-top: 16px;
+        }
+
+        .checkbox-item {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 12px;
+            padding: 8px 0;
             cursor: pointer;
-            font-size: 13px;
         }
 
-        .checkbox-option input[type="checkbox"] {
-            margin: 0;
-            accent-color: #007bff;
+        .checkbox {
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 4px;
+            position: relative;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .checkbox.checked {
+            background: var(--accent-color);
+            border-color: var(--accent-color);
+        }
+
+        .checkbox.checked::after {
+            content: '✓';
+            position: absolute;
+            top: -2px;
+            left: 2px;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
         }
 
         .checkbox-label {
-            color: #555;
+            font-size: 15px;
+            color: var(--text-primary);
         }
 
-
-        .action-btn {
-            padding: 4px 8px;
-            border: 1px solid #ddd;
-            border-radius: 3px;
-            background-color: white;
-            color: #666;
-            font-size: 11px;
-            cursor: pointer;
-            transition: all 0.2s;
+        /* Subsection */
+        .subsection {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 16px;
         }
 
-        .action-btn:hover {
-            background-color: #f0f0f0;
+        .subsection-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 12px;
         }
 
-        .action-btn.restore {
-            background-color: #28a745;
-            color: white;
-            border-color: #28a745;
-        }
-
-        .action-btn.restore:hover {
-            background-color: #218838;
-        }
-
-        .action-btn.delete {
-            background-color: #dc3545;
-            color: white;
-            border-color: #dc3545;
-        }
-
-        .action-btn.delete:hover {
-            background-color: #c82333;
-        }
-
-        .loading-spinner {
-            display: inline-block;
-            width: 12px;
-            height: 12px;
-            border: 2px solid #f3f3f3;
-            border-top: 2px solid #007bff;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .status-message {
-            padding: 8px 12px;
-            border-radius: 4px;
-            font-size: 12px;
-            margin-top: 10px;
+        /* Footer */
+        .footer {
             text-align: center;
+            margin-top: 48px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .footer-text {
+            font-size: 14px;
+            color: var(--text-tertiary);
+        }
+
+        .footer-link {
+            color: var(--accent-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .footer-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Status Message */
+        .status-message {
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-top: 16px;
+            text-align: center;
+            display: none;
         }
 
         .status-success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
+            background: rgba(15, 123, 15, 0.1);
+            color: var(--success-color);
+            border: 1px solid rgba(15, 123, 15, 0.2);
         }
 
         .status-error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
+            background: rgba(185, 80, 0, 0.1);
+            color: var(--warning-color);
+            border: 1px solid rgba(185, 80, 0, 0.2);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 40px 20px;
+            }
+
+            .section {
+                padding: 24px;
+            }
+
+            .header h1 {
+                font-size: 28px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>Tab Neat Options</h2>
-
-        <div class="toggle-container">
-            <span class="toggle-label">Enable Tab Grouping</span>
-            <label class="toggle-switch">
-                <input type="checkbox" id="groupTabsToggle">
-                <span class="toggle-slider"></span>
-            </label>
+        <div class="header">
+            <h1>SessionVault Settings</h1>
+            <p>Configure your session management and browsing experience</p>
         </div>
 
-        <div class="toggle-container">
-          <span class="toggle-label">Collapse Groups by Default</span>
-          <label class="toggle-switch">
-              <input type="checkbox" id="collapseGroupsToggle">
-              <span class="toggle-slider"></span>
-          </label>
-      </div>
+        <!-- New Tab Override Section -->
+        <div class="section">
+            <h2 class="section-title">🆕 New Tab Experience</h2>
+            <p class="section-description">Control how SessionVault integrates with your new tab page</p>
 
-        <div class="toggle-container">
-            <span class="toggle-label">Override New Tab Page</span>
-            <label class="toggle-switch">
-                <input type="checkbox" id="newTabOverrideToggle" checked>
-                <span class="toggle-slider"></span>
-            </label>
-        </div>
-
-        <div class="option-section">
-            <h3>Sort Options</h3>
-            <div class="sort-container">
-                <label class="sort-option">
-                    <input type="radio" name="sortOrder" value="alphabetical" id="sortAlphabetical">
-                    <span class="radio-label">🔤 Alphabetical Order</span>
-                </label>
-                <label class="sort-option">
-                    <input type="radio" name="sortOrder" value="recent" id="sortRecent">
-                    <span class="radio-label">🕒 Recent Visit Order</span>
-                </label>
-                <label class="sort-option">
-                    <input type="radio" name="sortOrder" value="custom" id="sortCustom">
-                    <span class="radio-label">✋ Custom Order</span>
-                </label>
-            </div>
-
-            <div id="customOrderSection" class="custom-order-section" style="display: none;">
-                <h4>Domain Order Settings</h4>
-                <div id="domainList" class="domain-list">
-                    <!-- Domain list will be dynamically added here -->
+            <div class="setting-group">
+                <div class="setting-item">
+                    <div class="setting-label">
+                        <div class="setting-title">Override New Tab Page</div>
+                        <div class="setting-subtitle">Replace Chrome's default new tab with SessionVault's session manager</div>
+                    </div>
+                    <div class="toggle-switch" id="newTabOverrideToggle">
+                    </div>
                 </div>
-                <button id="resetCustomOrder" class="reset-btn">Reset to Default Order</button>
             </div>
         </div>
 
-        <div class="option-section">
-            <h3>Auto Session Save</h3>
+        <!-- Auto Session Save Section -->
+        <div class="section">
+            <h2 class="section-title">💾 Session Management</h2>
+            <p class="section-description">Configure automatic session backup and restore settings</p>
 
-            <div class="toggle-container">
-                <span class="toggle-label">Enable Auto Save</span>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="autoSaveToggle" checked>
-                    <span class="toggle-slider"></span>
-                </label>
-            </div>
-
-            <div class="toggle-container">
-                <span class="toggle-label">Save All Windows</span>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="autoSaveAllWindowsToggle">
-                    <span class="toggle-slider"></span>
-                </label>
-            </div>
-
-            <div class="auto-save-trigger-section">
-                <h4 style="margin: 20px 0 10px 0; font-size: 14px; color: #333;">Auto Save Trigger</h4>
-
-                <div class="radio-group">
-                    <label class="radio-option">
-                        <input type="radio" name="autoSaveTrigger" value="time" id="timeTrigger" checked>
-                        <span class="radio-label">⏱️ Time-based</span>
-                    </label>
-                    <label class="radio-option">
-                        <input type="radio" name="autoSaveTrigger" value="change" id="changeTrigger">
-                        <span class="radio-label">🔄 When changes occur</span>
-                    </label>
+            <div class="setting-group">
+                <div class="setting-item">
+                    <div class="setting-label">
+                        <div class="setting-title">Enable Auto Save</div>
+                        <div class="setting-subtitle">Automatically backup your browsing sessions</div>
+                    </div>
+                    <div class="toggle-switch active" id="autoSaveToggle">
+                    </div>
                 </div>
 
-                <div id="timeIntervalSection" class="time-interval-section">
-                    <h5 style="margin: 15px 0 8px 0; font-size: 13px; color: #555;">Save Interval</h5>
-                    <select id="autoSaveInterval" class="interval-select">
-                        <option value="30">30 seconds</option>
-                        <option value="60" selected>1 minute</option>
-                        <option value="600" selected>10 minute</option>
-                        <option value="1800">30 minutes</option>
-                        <option value="3600">1 hour</option>
-                    </select>
-                </div>
-
-                <div id="changeDetectionSection" class="change-detection-section" style="display: none;">
-                    <h5 style="margin: 15px 0 8px 0; font-size: 13px; color: #555;">Detect Changes</h5>
-                    <div class="change-options">
-                        <label class="checkbox-option">
-                            <input type="checkbox" id="detectTabClose" checked>
-                            <span class="checkbox-label">Tab closed</span>
-                        </label>
-                        <label class="checkbox-option">
-                            <input type="checkbox" id="detectTabCreate" checked>
-                            <span class="checkbox-label">New tab navigation</span>
-                        </label>
-                        <label class="checkbox-option">
-                            <input type="checkbox" id="detectUrlChange" checked>
-                            <span class="checkbox-label">URL/domain change</span>
-                        </label>
+                <div class="setting-item">
+                    <div class="setting-label">
+                        <div class="setting-title">Save All Windows</div>
+                        <div class="setting-subtitle">Include tabs from all browser windows in backups</div>
+                    </div>
+                    <div class="toggle-switch" id="autoSaveAllWindowsToggle">
                     </div>
                 </div>
             </div>
 
-            <div class="auto-save-info">
-                <p style="font-size: 12px; color: #666; margin: 10px 0;">
-                    📁 Auto-saved sessions are stored separately and accessible from new tabs
-                </p>
-                <p style="font-size: 12px; color: #666; margin: 10px 0;">
-                    🔄 Sessions are automatically saved based on your selected trigger
-                </p>
+            <div class="subsection">
+                <div class="subsection-title">Backup Trigger</div>
+
+                <div class="radio-group">
+                    <div class="radio-option selected" data-value="time">
+                        <div class="radio-button"></div>
+                        <div>
+                            <div class="radio-label">⏱️ Time-based</div>
+                            <div class="radio-description">Save sessions at regular intervals</div>
+                        </div>
+                    </div>
+                    <div class="radio-option" data-value="change">
+                        <div class="radio-button"></div>
+                        <div>
+                            <div class="radio-label">🔄 Event-based</div>
+                            <div class="radio-description">Save when tabs are closed or navigated</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="timeIntervalSection" class="select-container">
+                    <div class="select-wrapper">
+                        <select id="autoSaveInterval" class="select">
+                            <option value="30">Every 30 seconds</option>
+                            <option value="60" selected>Every minute</option>
+                            <option value="300">Every 5 minutes</option>
+                            <option value="600">Every 10 minutes</option>
+                            <option value="1800">Every 30 minutes</option>
+                            <option value="3600">Every hour</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="changeDetectionSection" class="checkbox-group" style="display: none;">
+                    <div class="checkbox-item">
+                        <div class="checkbox checked" data-id="detectTabClose"></div>
+                        <div class="checkbox-label">Save when tabs are closed</div>
+                    </div>
+                    <div class="checkbox-item">
+                        <div class="checkbox checked" data-id="detectTabCreate"></div>
+                        <div class="checkbox-label">Save when navigating to new sites</div>
+                    </div>
+                    <div class="checkbox-item">
+                        <div class="checkbox checked" data-id="detectUrlChange"></div>
+                        <div class="checkbox-label">Save when URL or domain changes</div>
+                    </div>
+                </div>
             </div>
+
+            <div class="status-message" id="statusMessage"></div>
         </div>
 
-        <div class="footer">TabNeat - Smart Tab Organization</div>
+        <div class="footer">
+            <p class="footer-text">
+                SessionVault • Smart Session Management •
+                <a href="https://github.com/bingoring/session-vault" class="footer-link" target="_blank">GitHub</a>
+            </p>
+        </div>
     </div>
 
     <script src="options.js"></script>

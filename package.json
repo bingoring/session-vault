@@ -1,29 +1,30 @@
 {
-  "name": "tabneat",
+  "name": "session-vault",
   "version": "1.4.0",
-  "description": "Smart Tab Organization Chrome Extension - Automatically sorts and groups your tabs by domain for a cleaner browser experience",
+  "description": "Powerful session management Chrome extension - Backup, restore, and organize your browsing sessions with smart tab grouping",
   "main": "background.js",
   "scripts": {
     "build": "npm run package",
-    "package": "zip -r tabneat.zip . -x '*.git*' '*.github*' 'node_modules/*' '*.DS_Store'",
-    "deploy": "chrome-webstore-upload upload --source tabneat.zip --extension-id $EXTENSION_ID --client-id $CLIENT_ID --client-secret $CLIENT_SECRET --refresh-token $REFRESH_TOKEN --auto-publish"
+    "package": "zip -r session-vault.zip . -x '*.git*' '*.github*' 'node_modules/*' '*.DS_Store'",
+    "deploy": "chrome-webstore-upload upload --source session-vault.zip --extension-id $EXTENSION_ID --client-id $CLIENT_ID --client-secret $CLIENT_SECRET --refresh-token $REFRESH_TOKEN --auto-publish"
   },
   "keywords": [
     "chrome-extension",
+    "session-management",
     "tabs",
+    "backup",
+    "restore",
     "organization",
     "productivity",
-    "browser",
-    "favicon",
-    "color-extraction"
+    "browser"
   ],
   "author": "bingoring",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/bingoring/tabneat.git"
+    "url": "https://github.com/bingoring/session-vault.git"
   },
-  "homepage": "https://github.com/bingoring/tabneat",
+  "homepage": "https://github.com/bingoring/session-vault",
   "devDependencies": {
     "chrome-webstore-upload-cli": "^3.0.0"
   }

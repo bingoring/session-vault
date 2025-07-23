@@ -173,7 +173,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
            cache: 'default',
            headers: {
              'Accept': 'image/*',
-             'User-Agent': 'Mozilla/5.0 (compatible; TabNeat/1.3.1)'
+             'User-Agent': 'Mozilla/5.0 (compatible; SessionVault/1.4.0)'
            }
          });
 

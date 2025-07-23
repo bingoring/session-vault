@@ -5,7 +5,7 @@ let isOverrideEnabled = true;
 (async () => {
   try {
     // 이미 리다이렉트 중인지 확인 (무한반복 방지)
-    const redirecting = sessionStorage.getItem('tabneat_redirecting');
+    const redirecting = sessionStorage.getItem('sessionvault_redirecting');
     if (redirecting === 'true') {
       console.log('Already redirecting, showing blank page');
       document.body.style.visibility = 'visible';
@@ -17,7 +17,7 @@ let isOverrideEnabled = true;
     if (settings.newTabOverride === false) {
       isOverrideEnabled = false;
       // 리다이렉트 플래그 설정
-      sessionStorage.setItem('tabneat_redirecting', 'true');
+      sessionStorage.setItem('sessionvault_redirecting', 'true');
       // 새 탭 오버라이드가 비활성화된 경우 즉시 리다이렉트
       chrome.runtime.sendMessage({ action: 'openChromeNewTab' });
       return;
@@ -36,7 +36,19 @@ let isOverrideEnabled = true;
 // 즉시 테마 적용 함수 (깜빡임 방지용)
 async function applyThemeImmediately() {
   try {
-    // chrome.theme API 사용 가능 여부 확인
+    // 먼저 캐시된 테마 정보를 요청
+    try {
+      const response = await chrome.runtime.sendMessage({ action: "getCachedTheme" });
+      if (response.success && response.theme) {
+        console.log('Using cached theme:', response.theme);
+        applyThemeFromCache(response.theme);
+        return;
+      }
+    } catch (error) {
+      console.log('Failed to get cached theme, falling back to direct API call:', error);
+    }
+
+    // 캐시된 테마가 없으면 직접 chrome.theme API 사용
     if (!chrome.theme || !chrome.theme.getCurrent) {
       console.log('Chrome theme API not available, using system theme');
       applySystemTheme();
@@ -73,14 +85,27 @@ async function applyThemeImmediately() {
                     colors.bookmark_text ||
                     (isDarkTheme ? '#e8eaed' : '#333333');
 
-        // 초기 다크 배경을 덮어쓰기 위해 직접 스타일 적용
+            // 초기 다크 배경을 덮어쓰기 위해 직접 스타일 적용
     document.body.style.setProperty('background', backgroundColor, 'important');
     document.body.style.setProperty('color', textColor, 'important');
 
-        // 검색창 관련 기본 변수 설정
+    // 검색창 관련 기본 변수 설정
     const cardBg = isDarkTheme ? '#3c4043' : 'rgba(255, 255, 255, 0.95)';
     const secondaryText = isDarkTheme ? 'rgba(232, 234, 237, 0.7)' : 'rgba(60, 64, 67, 0.7)';
     const iconBg = isDarkTheme ? '#2d2d30' : '#f0f0f0';
+
+    // 검색창 스타일도 즉시 적용 (깜빡임 방지)
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+      searchInput.style.setProperty('background', cardBg, 'important');
+      searchInput.style.setProperty('color', textColor, 'important');
+      searchInput.style.setProperty('box-shadow', `0 4px 16px ${isDarkTheme ? 'rgba(0, 0, 0, 0.3)' : 'rgba(0, 0, 0, 0.1)'}`, 'important');
+
+      // placeholder 색상 설정을 위한 CSS 규칙 추가
+      const style = document.createElement('style');
+      style.textContent = `.search-input::placeholder { color: ${secondaryText} !important; }`;
+      document.head.appendChild(style);
+    }
 
     root.style.setProperty('--theme-card-background', cardBg);
     root.style.setProperty('--theme-input-bg', cardBg);
@@ -106,6 +131,42 @@ async function applyThemeImmediately() {
   }
 }
 
+// 캐시된 테마 적용 함수
+function applyThemeFromCache(theme) {
+  const root = document.documentElement;
+
+  // body 스타일 직접 적용
+  document.body.style.setProperty('background', theme.backgroundColor, 'important');
+  document.body.style.setProperty('color', theme.textColor, 'important');
+
+  // 검색창 스타일도 즉시 적용 (깜빡임 방지)
+  const searchInput = document.getElementById('searchInput');
+  if (searchInput) {
+    searchInput.style.setProperty('background', theme.cardBg, 'important');
+    searchInput.style.setProperty('color', theme.textColor, 'important');
+    searchInput.style.setProperty('box-shadow', `0 4px 16px ${theme.boxShadow}`, 'important');
+
+    // placeholder 색상 설정을 위한 CSS 규칙 추가
+    const style = document.createElement('style');
+    style.textContent = `.search-input::placeholder { color: ${theme.secondaryText} !important; }`;
+    document.head.appendChild(style);
+  }
+
+  // CSS 변수 설정
+  root.style.setProperty('--theme-card-background', theme.cardBg);
+  root.style.setProperty('--theme-input-bg', theme.cardBg);
+  root.style.setProperty('--theme-input-text', theme.textColor);
+  root.style.setProperty('--theme-input-placeholder', theme.secondaryText);
+  root.style.setProperty('--theme-secondary-text', theme.secondaryText);
+  root.style.setProperty('--theme-icon-background', theme.isDarkTheme ? '#2d2d30' : '#f0f0f0');
+  root.style.setProperty('--theme-scrollbar-thumb', theme.isDarkTheme ? 'rgba(232, 234, 237, 0.2)' : 'rgba(60, 64, 67, 0.2)');
+  root.style.setProperty('--theme-scrollbar-thumb-hover', theme.isDarkTheme ? 'rgba(232, 234, 237, 0.3)' : 'rgba(60, 64, 67, 0.3)');
+
+  // 테마 클래스 설정
+  document.body.classList.toggle('dark-theme', theme.isDarkTheme);
+  document.body.classList.toggle('light-theme', !theme.isDarkTheme);
+}
+
 // 시스템 테마 적용 (fallback)
 function applySystemTheme() {
   const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -114,6 +175,19 @@ function applySystemTheme() {
   if (isDark) {
     document.body.style.setProperty('background', 'linear-gradient(135deg, #1a1a1a 0%, #2d2d30 100%)', 'important');
     document.body.style.setProperty('color', '#e8eaed', 'important');
+
+    // 검색창 스타일 직접 적용
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+      searchInput.style.setProperty('background', '#3c4043', 'important');
+      searchInput.style.setProperty('color', '#e8eaed', 'important');
+      searchInput.style.setProperty('box-shadow', '0 4px 16px rgba(0, 0, 0, 0.3)', 'important');
+
+      // placeholder 색상 설정
+      const style = document.createElement('style');
+      style.textContent = `.search-input::placeholder { color: rgba(232, 234, 237, 0.7) !important; }`;
+      document.head.appendChild(style);
+    }
 
     // 다크 테마 검색창 변수 설정
     root.style.setProperty('--theme-card-background', '#3c4043');
@@ -127,9 +201,22 @@ function applySystemTheme() {
 
     document.body.classList.add('dark-theme');
     document.body.classList.remove('light-theme');
-  } else {
-    document.body.style.setProperty('background', 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', 'important');
-    document.body.style.setProperty('color', '#333333', 'important');
+      } else {
+            document.body.style.setProperty('background', 'linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%)', 'important');
+      document.body.style.setProperty('color', '#202124', 'important');
+
+    // 검색창 스타일 직접 적용
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+      searchInput.style.setProperty('background', 'rgba(255, 255, 255, 0.95)', 'important');
+      searchInput.style.setProperty('color', '#333333', 'important');
+      searchInput.style.setProperty('box-shadow', '0 4px 16px rgba(0, 0, 0, 0.1)', 'important');
+
+      // placeholder 색상 설정
+      const style = document.createElement('style');
+      style.textContent = `.search-input::placeholder { color: rgba(60, 64, 67, 0.7) !important; }`;
+      document.head.appendChild(style);
+    }
 
     // 라이트 테마 검색창 변수 설정
     root.style.setProperty('--theme-card-background', 'rgba(255, 255, 255, 0.95)');
@@ -768,7 +855,9 @@ document.addEventListener('DOMContentLoaded', async () => {
               const query = searchInput.value.trim();
               if (query) {
                   await saveSearchHistory(query);
-                  handleSearch(query);
+                  // Ctrl+Enter: 새 탭에서 검색, 일반 Enter: 현재 탭에서 검색
+                  const openInNewTab = event.ctrlKey || event.metaKey;
+                  handleSearch(query, openInNewTab);
               }
           } else if (event.key === 'ArrowDown') {
               event.preventDefault();
@@ -834,18 +923,35 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // 검색 처리
-  function handleSearch(query) {
+  async function handleSearch(query, openInNewTab = false) {
       if (!query) return;
 
-      // 입력된 값이 URL인지 확인
-      if (isValidUrl(query)) {
-          // URL인 경우 해당 사이트로 이동
-          const url = query.startsWith('http') ? query : `https://${query}`;
-          window.location.href = url;
-      } else {
-          // URL이 아닌 경우 Google 검색
+      try {
+          // 입력된 값이 URL인지 확인
+          if (isValidUrl(query)) {
+              // URL인 경우 해당 사이트로 이동
+              const url = query.startsWith('http') ? query : `https://${query}`;
+              if (openInNewTab) {
+                  window.open(url, '_blank');
+              } else {
+                  window.location.href = url;
+              }
+          } else {
+              // URL이 아닌 경우 Chrome Search API를 사용하여 기본 검색 공급자로 검색
+              await chrome.search.query({
+                  text: query,
+                  disposition: openInNewTab ? "NEW_TAB" : "CURRENT_TAB"
+              });
+          }
+      } catch (error) {
+          console.error('Search error:', error);
+          // Chrome Search API 실패 시 Google 검색으로 fallback
           const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
-          window.location.href = googleSearchUrl;
+          if (openInNewTab) {
+              window.open(googleSearchUrl, '_blank');
+          } else {
+              window.location.href = googleSearchUrl;
+          }
       }
   }
 
@@ -1253,7 +1359,9 @@ document.addEventListener('DOMContentLoaded', async () => {
               searchInput.value = query;
 
               await saveSearchHistory(query);
-              handleSearch(query);
+              // Ctrl+클릭: 새 탭에서 검색, 일반 클릭: 현재 탭에서 검색
+              const openInNewTab = event.ctrlKey || event.metaKey;
+              handleSearch(query, openInNewTab);
           });
       });
 
@@ -1474,14 +1582,14 @@ document.addEventListener('DOMContentLoaded', async () => {
       const root = document.documentElement;
 
       // 기본 라이트 테마를 body에 직접 적용
-      document.body.style.setProperty('background', 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', 'important');
+      document.body.style.setProperty('background', 'linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%)', 'important');
       document.body.style.setProperty('background-image', 'none', 'important');
-      document.body.style.setProperty('color', '#333333', 'important');
+      document.body.style.setProperty('color', '#202124', 'important');
 
       // CSS 변수도 설정 (하위 요소들을 위해)
-      root.style.setProperty('--theme-background', 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)');
+      root.style.setProperty('--theme-background', 'linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%)');
       root.style.setProperty('--theme-background-image', 'none');
-      root.style.setProperty('--theme-text', '#333333');
+      root.style.setProperty('--theme-text', '#202124');
       root.style.setProperty('--theme-surface', 'rgba(255, 255, 255, 0.1)');
       root.style.setProperty('--theme-surface-hover', 'rgba(255, 255, 255, 0.2)');
       root.style.setProperty('--theme-border', 'rgba(255, 255, 255, 0.2)');

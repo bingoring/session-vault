@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TabNeat - New Tab</title>
+    <title>SessionVault - New Tab</title>
     <style>
         * {
             margin: 0;
@@ -11,18 +11,25 @@
             box-sizing: border-box;
         }
 
-        /* 강제 다크 테마를 기본값으로 설정 (깜빡임 방지) */
+        /* 시스템 테마에 따른 기본 배경 설정 (깜빡임 방지) */
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            /* 다크 테마를 기본값으로 강제 설정 */
-            background: #202124 !important;
-            color: #e8eaed !important;
+            /* 깔끔한 라이트 테마 배경 */
+            background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%) !important;
+            color: #202124 !important;
             /* 초기 로딩 시 페이지 숨김 */
             visibility: hidden;
             min-height: 100vh;
-            color: var(--theme-text, #333);
             padding-top: 70px;
             transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* 다크모드에서 body 배경 */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background: #202124 !important;
+                color: #e8eaed !important;
+            }
         }
 
         /* 검색창 스타일 */
@@ -43,12 +50,22 @@
             font-size: 16px;
             border: none;
             border-radius: 24px;
+            /* 시스템 테마에 따라 적절한 기본값 설정 */
             background: var(--theme-card-background, rgba(255, 255, 255, 0.95));
             backdrop-filter: blur(10px);
             box-shadow: 0 4px 16px var(--theme-border, rgba(0, 0, 0, 0.1));
             outline: none;
-            color: var(--theme-text, #333);
+            color: var(--theme-text, #202124);
             transition: all 0.3s ease;
+        }
+
+        /* 다크모드 기본값 */
+        @media (prefers-color-scheme: dark) {
+            .search-input {
+                background: var(--theme-card-background, #3c4043);
+                box-shadow: 0 4px 16px var(--theme-border, rgba(0, 0, 0, 0.3));
+                color: var(--theme-text, #e8eaed);
+            }
         }
 
         .search-input:focus {
@@ -58,6 +75,18 @@
 
         .search-input::placeholder {
             color: var(--theme-input-placeholder, var(--theme-secondary-text, #666));
+        }
+
+        /* 다크모드에서 포커스 상태와 placeholder */
+        @media (prefers-color-scheme: dark) {
+            .search-input:focus {
+                background: var(--theme-input-bg, var(--theme-card-background, #3c4043));
+                box-shadow: 0 8px 32px var(--theme-border, rgba(0, 0, 0, 0.4));
+            }
+
+            .search-input::placeholder {
+                color: var(--theme-input-placeholder, var(--theme-secondary-text, rgba(232, 234, 237, 0.7)));
+            }
         }
 
         /* 검색 기록 드롭다운 */
@@ -80,6 +109,15 @@
             border: 1px solid var(--theme-border, transparent);
         }
 
+        /* 다크모드에서 드롭다운 */
+        @media (prefers-color-scheme: dark) {
+            .search-history-dropdown {
+                background: var(--theme-card-background, #3c4043);
+                box-shadow: 0 8px 32px var(--theme-border, rgba(0, 0, 0, 0.4));
+                border: 1px solid var(--theme-border, rgba(95, 99, 104, 0.3));
+            }
+        }
+
         .search-history-dropdown::-webkit-scrollbar {
             width: 8px;
         }
@@ -96,6 +134,17 @@
 
         .search-history-dropdown::-webkit-scrollbar-thumb:hover {
             background: var(--theme-scrollbar-thumb-hover, rgba(0, 0, 0, 0.3));
+        }
+
+        /* 다크모드에서 스크롤바 */
+        @media (prefers-color-scheme: dark) {
+            .search-history-dropdown::-webkit-scrollbar-thumb {
+                background: var(--theme-scrollbar-thumb, rgba(232, 234, 237, 0.2));
+            }
+
+            .search-history-dropdown::-webkit-scrollbar-thumb:hover {
+                background: var(--theme-scrollbar-thumb-hover, rgba(232, 234, 237, 0.3));
+            }
         }
 
         .search-history-dropdown.visible {
@@ -130,7 +179,7 @@
         .search-history-text {
             flex: 1;
             font-size: 14px;
-            color: var(--theme-text, #333);
+            color: var(--theme-text, #202124);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -148,6 +197,31 @@
         .search-history-delete:hover {
             background-color: var(--theme-hover, #e9ecef);
             color: var(--theme-text, #666);
+        }
+
+        /* 다크모드에서 검색 기록 아이템들 */
+        @media (prefers-color-scheme: dark) {
+            .search-history-item:hover,
+            .search-history-item.highlighted {
+                background-color: var(--theme-hover, rgba(232, 234, 237, 0.1));
+            }
+
+            .search-history-icon {
+                color: var(--theme-secondary-text, rgba(232, 234, 237, 0.7));
+            }
+
+            .search-history-text {
+                color: var(--theme-text, #e8eaed);
+            }
+
+            .search-history-delete {
+                color: var(--theme-secondary-text, rgba(232, 234, 237, 0.7));
+            }
+
+            .search-history-delete:hover {
+                background-color: var(--theme-hover, rgba(232, 234, 237, 0.2));
+                color: var(--theme-text, #e8eaed);
+            }
         }
 
         .search-history-empty {
@@ -198,10 +272,43 @@
         .search-suggestion-text {
             flex: 1;
             font-size: 14px;
-            color: var(--theme-text, #333);
+            color: var(--theme-text, #202124);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+        }
+
+        /* 다크모드에서 검색 제안들 */
+        @media (prefers-color-scheme: dark) {
+            .search-history-empty {
+                color: var(--theme-secondary-text, rgba(232, 234, 237, 0.7));
+            }
+
+            .search-suggestions-section {
+                border-bottom: 1px solid var(--theme-border, rgba(95, 99, 104, 0.3));
+            }
+
+            .search-suggestions-header {
+                color: var(--theme-secondary-text, rgba(232, 234, 237, 0.7));
+                background-color: var(--theme-hover, rgba(232, 234, 237, 0.1));
+            }
+
+            .search-suggestion-item {
+                border-bottom: 1px solid var(--theme-border, rgba(95, 99, 104, 0.3));
+            }
+
+            .search-suggestion-item:hover,
+            .search-suggestion-item.highlighted {
+                background-color: var(--theme-hover, rgba(232, 234, 237, 0.1));
+            }
+
+            .search-suggestion-icon {
+                color: var(--theme-secondary-text, rgba(232, 234, 237, 0.7));
+            }
+
+            .search-suggestion-text {
+                color: var(--theme-text, #e8eaed);
+            }
         }
 
         .search-suggestion-text .highlight {
@@ -1378,7 +1485,7 @@
     <!-- 검색창 섹션 -->
     <div class="search-section">
         <div class="search-container">
-            <input type="text" class="search-input" placeholder="Search Google or type a URL" id="searchInput" autocomplete="off" spellcheck="false">
+            <input type="text" class="search-input" placeholder="Search or type a URL • Ctrl+Enter for new tab" id="searchInput" autocomplete="off" spellcheck="false">
             <div class="search-history-dropdown" id="searchHistoryDropdown">
                 <div class="search-history-empty">No search history</div>
             </div>
@@ -1394,7 +1501,7 @@
 
     <div class="container">
         <div class="header">
-            <h1>TabNeat</h1>
+            <h1>SessionVault</h1>
             <p>Restore your recently closed sessions and tabs</p>
         </div>
 
