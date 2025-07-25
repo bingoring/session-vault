@@ -1,3 +1,36 @@
+// ============== Side Panel Management ==============
+
+// Handle action button click to open side panel
+chrome.action.onClicked.addListener(async (tab) => {
+  try {
+    console.log('Action button clicked, opening side panel');
+
+    // Simply open the side panel for this window
+    await chrome.sidePanel.open({
+      windowId: tab.windowId
+    });
+
+    console.log('Side panel opened successfully');
+  } catch (error) {
+    console.error('Error opening side panel:', error);
+
+    // Fallback: try setting side panel options first
+    try {
+      await chrome.sidePanel.setOptions({
+        tabId: tab.id,
+        enabled: true,
+        path: 'sidepanel.html'
+      });
+
+      await chrome.sidePanel.open({
+        windowId: tab.windowId
+      });
+    } catch (fallbackError) {
+      console.error('Fallback error:', fallbackError);
+    }
+  }
+});
+
 // ============== Auto Session Save System ==============
 
 let autoSaveInterval = null;
@@ -15,6 +48,38 @@ let autoSaveSettings = {
 let tabCache = new Map();
 let groupCache = new Map();
 
+// 탭 필터링 함수 - 새 탭과 불필요한 탭들을 제외
+function shouldFilterTab(tab) {
+  if (!tab.url) return true;
+
+  // 새 탭 제외
+  if (tab.url === 'chrome://newtab/' || tab.url.includes('chrome://newtab')) {
+    return true;
+  }
+
+  // 크롬 내부 페이지들 제외
+  if (tab.url.startsWith('chrome://')) {
+    return true;
+  }
+
+  // 확장프로그램 페이지들 제외
+  if (tab.url.startsWith('chrome-extension://')) {
+    return true;
+  }
+
+  // about:blank 제외
+  if (tab.url === 'about:blank') {
+    return true;
+  }
+
+  // 제목이 없거나 'New Tab'인 경우도 제외
+  if (!tab.title || tab.title.trim() === '' || tab.title === 'New Tab') {
+    return true;
+  }
+
+  return false;
+}
+
 // 사용하지 않는 변수 제거됨
 
 // 탭과 그룹 정보 캐시 업데이트
@@ -23,20 +88,22 @@ async function updateTabCache() {
     const tabs = await chrome.tabs.query({});
     // 기존 캐시를 완전히 지우지 말고 업데이트만 하기
     tabs.forEach(tab => {
-      // chrome:// URL이나 확장 프로그램 페이지는 캐시하지 않기
-      if (!tab.url.startsWith('chrome://') && !tab.url.startsWith('chrome-extension://')) {
-        tabCache.set(tab.id, {
-          id: tab.id,
-          url: tab.url,
-          title: tab.title,
-          index: tab.index,
-          active: tab.active,
-          pinned: tab.pinned,
-          groupId: tab.groupId,
-          windowId: tab.windowId,
-          favicon: tab.favIconUrl
-        });
+      // 새 탭과 불필요한 탭들은 캐시하지 않기
+      if (shouldFilterTab(tab)) {
+        return;
       }
+
+      tabCache.set(tab.id, {
+        id: tab.id,
+        url: tab.url,
+        title: tab.title,
+        index: tab.index,
+        active: tab.active,
+        pinned: tab.pinned,
+        groupId: tab.groupId,
+        windowId: tab.windowId,
+        favicon: tab.favIconUrl
+      });
     });
 
     // 그룹 정보도 캐시
@@ -255,6 +322,15 @@ async function autoSaveCurrentSession(saveAllWindows = false) {
       return;
     }
 
+    // 필터링된 탭 목록 생성
+    const filteredTabs = allTabs.filter(tab => !shouldFilterTab(tab));
+
+    // 필터링 후 저장할 탭이 없으면 리턴
+    if (filteredTabs.length === 0) {
+      console.log("No valid tabs to save in auto-save after filtering");
+      return;
+    }
+
     // 세션 데이터 생성
     const sessionData = {
       id: `auto_${now}`,
@@ -262,7 +338,7 @@ async function autoSaveCurrentSession(saveAllWindows = false) {
       createdAt: now,
       isAutoSaved: true,
       saveAllWindows: saveAllWindows,
-      tabs: allTabs.map(tab => ({
+      tabs: filteredTabs.map(tab => ({
         id: tab.id,
         url: tab.url,
         title: tab.title,
@@ -280,7 +356,7 @@ async function autoSaveCurrentSession(saveAllWindows = false) {
         collapsed: group.collapsed,
         sourceWindowId: group.sourceWindowId || group.windowId
       })),
-      tabCount: allTabs.length,
+      tabCount: filteredTabs.length,
       groupCount: allGroups.length,
       windowCount: saveAllWindows ? (await chrome.windows.getAll()).length : 1
     };
@@ -537,6 +613,21 @@ async function saveClosedTab(closedTabId, closedWindowId, isWindowClosing = fals
     }
 
     if (closedTabs.length === 0) {
+      return;
+    }
+
+        // 새 탭과 불필요한 탭들 필터링
+    closedTabs = closedTabs.filter(tab => {
+      if (shouldFilterTab(tab)) {
+        console.log("Filtering out tab:", tab.title, tab.url);
+        return false;
+      }
+      return true;
+    });
+
+    // 필터링 후 저장할 탭이 없으면 리턴
+    if (closedTabs.length === 0) {
+      console.log("No valid tabs to save after filtering");
       return;
     }
 

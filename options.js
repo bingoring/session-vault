@@ -30,7 +30,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   function initializeUI(settings) {
     // New Tab Override
-    setToggleState(newTabOverrideToggle, settings.newTabOverride ?? true);
+    setToggleState(newTabOverrideToggle, settings.newTabOverride ?? false);
 
     // Auto Save
     setToggleState(autoSaveToggle, settings.autoSaveEnabled ?? true);
