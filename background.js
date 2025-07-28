@@ -468,6 +468,9 @@ chrome.tabs.onRemoved.addListener(async (tabId, removeInfo) => {
       const { autoSaveAllWindows } = await chrome.storage.sync.get(['autoSaveAllWindows']);
       await autoSaveCurrentSession(autoSaveAllWindows === true);
     }
+
+    // Recently Closed Sessions에 항상 저장 (auto-save 설정과 별개)
+    await saveClosedTab(tabId, removeInfo.windowId, removeInfo.isWindowClosing);
   } catch (error) {
     console.error("Error in tab close handler:", error);
   }
@@ -725,7 +728,7 @@ async function saveCurrentSession(sessionName) {
 }
 
 // 세션 복원 함수
-async function restoreSession(sessionId, openInNewWindow = true) {
+async function restoreSession(sessionId, openInNewWindow = true, fromNewTab = false) {
   try {
     console.log("Restoring session:", sessionId);
 
@@ -800,7 +803,44 @@ async function restoreSession(sessionId, openInNewWindow = true) {
 
     console.log(`Creating ${validTabs.length} tabs from ${sessionData.tabs.length} total tabs`);
 
-    for (const tabInfo of validTabs) {
+    // newtab에서 현재 창으로 복원하는 경우, 현재 탭을 첫 번째 탭으로 활용
+    let currentTabUsed = false;
+    let currentTab = null;
+
+    if (fromNewTab && !openInNewWindow) {
+      try {
+        // 현재 활성 탭 가져오기
+        const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        if (activeTab && validTabs.length > 0) {
+          // 첫 번째 유효한 탭의 URL로 현재 탭 이동
+          const firstTab = validTabs[0];
+          await chrome.tabs.update(activeTab.id, {
+            url: firstTab.url,
+            pinned: firstTab.pinned
+          });
+
+          currentTab = activeTab;
+          currentTabUsed = true;
+
+          createdTabs.push({
+            tab: activeTab,
+            originalGroupId: firstTab.groupId,
+            originalIndex: firstTab.index,
+            wasActive: firstTab.active
+          });
+
+          console.log("Using current tab for first session tab:", firstTab.url);
+        }
+      } catch (error) {
+        console.error("Error using current tab:", error);
+        currentTabUsed = false;
+      }
+    }
+
+    // 나머지 탭들 생성 (첫 번째 탭이 현재 탭으로 처리된 경우 제외)
+    const tabsToCreate = currentTabUsed ? validTabs.slice(1) : validTabs;
+
+    for (const tabInfo of tabsToCreate) {
       try {
         const newTab = await chrome.tabs.create({
           windowId,
@@ -871,6 +911,14 @@ async function restoreSession(sessionId, openInNewWindow = true) {
       } catch (error) {
         console.error("Error setting active tab:", error);
       }
+    } else if (currentTabUsed && currentTab) {
+      // 현재 탭을 사용했지만 원래 활성 탭이 없는 경우, 현재 탭을 활성화 유지
+      try {
+        await chrome.tabs.update(currentTab.id, { active: true });
+        console.log("Keeping current tab active:", currentTab.id);
+      } catch (error) {
+        console.error("Error keeping current tab active:", error);
+      }
     }
 
     // 새 창에서 생성된 경우, 기본 빈 탭 제거
@@ -907,7 +955,7 @@ async function restoreSession(sessionId, openInNewWindow = true) {
 }
 
 // 개별 그룹 복원 함수
-async function restoreGroup(sessionId, groupId, openInNewWindow = true) {
+async function restoreGroup(sessionId, groupId, openInNewWindow = true, fromNewTab = false) {
   try {
     console.log("Restoring group:", groupId, "from session:", sessionId);
 
@@ -983,7 +1031,7 @@ async function restoreGroup(sessionId, groupId, openInNewWindow = true) {
       };
 
       console.log(`Creating fallback group info:`, fallbackGroupInfo);
-      return await restoreGroupWithInfo(sessionId, fallbackGroupInfo, groupTabs, openInNewWindow);
+      return await restoreGroupWithInfo(sessionId, fallbackGroupInfo, groupTabs, openInNewWindow, fromNewTab);
     }
 
     console.log(`Found group: ${groupInfo.title} (ID: ${groupInfo.id})`);
@@ -1006,7 +1054,7 @@ async function restoreGroup(sessionId, groupId, openInNewWindow = true) {
 
     console.log(`Found ${groupTabs.length} tabs in group: ${groupInfo.title}`);
 
-    return await restoreGroupWithInfo(sessionId, groupInfo, groupTabs, openInNewWindow);
+    return await restoreGroupWithInfo(sessionId, groupInfo, groupTabs, openInNewWindow, fromNewTab);
 
   } catch (error) {
     console.error("Error restoring group:", error);
@@ -1015,7 +1063,7 @@ async function restoreGroup(sessionId, groupId, openInNewWindow = true) {
 }
 
 // 그룹 정보와 탭 정보를 받아서 실제 복원을 수행하는 헬퍼 함수
-async function restoreGroupWithInfo(sessionId, groupInfo, groupTabs, openInNewWindow = true) {
+async function restoreGroupWithInfo(sessionId, groupInfo, groupTabs, openInNewWindow = true, fromNewTab = false) {
   try {
     console.log(`Starting group restore: ${groupInfo.title} with ${groupTabs.length} tabs`);
 
@@ -1064,7 +1112,38 @@ async function restoreGroupWithInfo(sessionId, groupInfo, groupTabs, openInNewWi
 
     console.log(`Creating ${validTabs.length} valid tabs out of ${groupTabs.length} total tabs`);
 
-    for (const tabInfo of validTabs) {
+    // newtab에서 현재 창으로 복원하는 경우, 현재 탭을 첫 번째 탭으로 활용
+    let currentTabUsed = false;
+    let currentTab = null;
+
+    if (fromNewTab && !openInNewWindow) {
+      try {
+        // 현재 활성 탭 가져오기
+        const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        if (activeTab && validTabs.length > 0) {
+          // 첫 번째 유효한 탭의 URL로 현재 탭 이동
+          const firstTab = validTabs[0];
+          await chrome.tabs.update(activeTab.id, {
+            url: firstTab.url,
+            pinned: firstTab.pinned || false
+          });
+
+          currentTab = activeTab;
+          currentTabUsed = true;
+          createdTabs.push(activeTab);
+
+          console.log("Using current tab for first group tab:", firstTab.url);
+        }
+      } catch (error) {
+        console.error("Error using current tab:", error);
+        currentTabUsed = false;
+      }
+    }
+
+    // 나머지 탭들 생성 (첫 번째 탭이 현재 탭으로 처리된 경우 제외)
+    const tabsToCreate = currentTabUsed ? validTabs.slice(1) : validTabs;
+
+    for (const tabInfo of tabsToCreate) {
       try {
         console.log(`Creating tab: ${tabInfo.title} (${tabInfo.url}) in window ${windowId}`);
 
@@ -1279,7 +1358,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 
   if (request.action === "restoreSession") {
-    restoreSession(request.sessionId, request.openInNewWindow)
+    restoreSession(request.sessionId, request.openInNewWindow, request.fromNewTab)
       .then(result => sendResponse(result))
       .catch(error => sendResponse({ success: false, error: error.message }));
     return true;
@@ -1287,7 +1366,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
   if (request.action === "restoreGroup") {
     const openInNewWindow = request.openInNewWindow !== false; // 기본값 true
-    restoreGroup(request.sessionId, request.groupId, openInNewWindow)
+    restoreGroup(request.sessionId, request.groupId, openInNewWindow, request.fromNewTab)
       .then(result => sendResponse(result))
       .catch(error => sendResponse({ success: false, error: error.message }));
     return true;

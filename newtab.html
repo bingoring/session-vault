@@ -346,7 +346,6 @@
         .header-link:hover {
             background: var(--theme-hover, rgba(255, 255, 255, 0.1));
             color: var(--theme-text, white);
-            text-decoration: underline;
         }
 
         .header-icon-btn {
@@ -364,7 +363,8 @@
         }
 
         .header-icon-btn:hover {
-            background: rgba(255, 255, 255, 0.1);
+            background: var(--theme-hover, rgba(255, 255, 255, 0.1));
+            transform: scale(1.05);
         }
 
         .header-icon-btn svg {
@@ -374,6 +374,16 @@
 
         .header-icon-btn:hover svg {
             opacity: 1;
+        }
+
+        /* Flask 아이콘 hover 효과 */
+        .header-icon-btn img {
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+
+        .header-icon-btn:hover img {
+            opacity: 1 !important;
+            transform: scale(1.1);
         }
 
         .header-icon-btn svg path {
@@ -404,6 +414,12 @@
             display: block;
         }
 
+        /* Flask 아이콘 기본 opacity */
+        .flask-icon-dark,
+        .flask-icon-light {
+            opacity: 0.9;
+        }
+
         /* 라이트모드에서 아이콘 전환 */
         @media (prefers-color-scheme: light) {
             .google-apps-icon-dark,
@@ -414,6 +430,17 @@
             .google-apps-icon-light,
             .flask-icon-light {
                 display: block;
+            }
+
+            .header-icon-btn:hover {
+                background: var(--theme-hover, rgba(60, 64, 67, 0.1));
+            }
+        }
+
+        /* 다크모드에서 header-icon-btn hover 효과 */
+        @media (prefers-color-scheme: dark) {
+            .header-icon-btn:hover {
+                background: var(--theme-hover, rgba(232, 234, 237, 0.1));
             }
         }
 
@@ -1334,8 +1361,8 @@
             <a href="https://mail.google.com" class="header-link">Gmail</a>
             <a href="https://images.google.com" class="header-link">Images</a>
             <button class="header-icon-btn" title="Search Labs">
-                <img class="flask-icon-dark" src="icons/google/flask.png" alt="Search Labs" width="20" height="20" style="opacity: 0.9;">
-                <img class="flask-icon-light" src="icons/google/flask-dark.png" alt="Search Labs" width="20" height="20" style="opacity: 0.9;">
+                <img class="flask-icon-dark" src="icons/google/flask.png" alt="Search Labs" width="20" height="20">
+                <img class="flask-icon-light" src="icons/google/flask-dark.png" alt="Search Labs" width="20" height="20">
             </button>
             <div class="google-apps-container">
                 <button class="header-icon-btn google-apps-btn" title="Google 앱">

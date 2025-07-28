@@ -731,10 +731,17 @@ document.addEventListener('DOMContentLoaded', async () => {
       const tabTitle = tabItem.dataset.tabTitle;
 
       try {
-          await chrome.tabs.create({
-              url: tabUrl,
-              active: true
-          });
+          // newtab에서는 현재 탭을 리다이렉트, 그 외에서는 새 탭 생성
+          if (window.location.pathname.includes('newtab.html')) {
+              // 현재 탭을 해당 URL로 이동
+              window.location.href = tabUrl;
+          } else {
+              // 새 탭 생성
+              await chrome.tabs.create({
+                  url: tabUrl,
+                  active: true
+              });
+          }
 
           showNotification(`Restored tab: ${tabTitle}`);
       } catch (error) {
@@ -757,12 +764,13 @@ document.addEventListener('DOMContentLoaded', async () => {
       groupItem.style.opacity = '0.5';
       groupItem.style.pointerEvents = 'none';
 
-      try {
+                try {
           const response = await chrome.runtime.sendMessage({
               action: 'restoreGroup',
               sessionId: sessionId,
               groupId: groupId,
-              openInNewWindow: false // 현재 창에서 열기
+              openInNewWindow: false, // 현재 창에서 열기
+              fromNewTab: true // newtab에서 호출됨을 표시
           });
 
           if (response.success) {
@@ -799,7 +807,8 @@ document.addEventListener('DOMContentLoaded', async () => {
           const response = await chrome.runtime.sendMessage({
               action: 'restoreSession',
               sessionId: sessionId,
-              openInNewWindow
+              openInNewWindow,
+              fromNewTab: true // newtab에서 호출됨을 표시
           });
 
           if (response.success) {
@@ -955,7 +964,14 @@ document.addEventListener('DOMContentLoaded', async () => {
       const tabUrl = tabItem.dataset.tabUrl;
 
       try {
-          await chrome.tabs.create({ url: tabUrl });
+          // newtab에서는 현재 탭을 리다이렉트, 그 외에서는 새 탭 생성
+          if (window.location.pathname.includes('newtab.html')) {
+              // 현재 탭을 해당 URL로 이동
+              window.location.href = tabUrl;
+          } else {
+              // 새 탭 생성
+              await chrome.tabs.create({ url: tabUrl });
+          }
           showNotification('Tab restored successfully!');
       } catch (error) {
           console.error('Error restoring closed tab:', error);
@@ -982,7 +998,8 @@ document.addEventListener('DOMContentLoaded', async () => {
               action: 'restoreGroup',
               sessionId: sessionId,
               groupId: groupId,
-              openInNewWindow: false // 현재 창에서 열기
+              openInNewWindow: false, // 현재 창에서 열기
+              fromNewTab: true // newtab에서 호출됨을 표시
           });
 
           if (response.success) {
