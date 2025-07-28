@@ -125,6 +125,9 @@ async function applyThemeImmediately() {
     document.body.classList.toggle('dark-theme', isDarkTheme);
     document.body.classList.toggle('light-theme', !isDarkTheme);
 
+    // 헤더 아이콘 테마 업데이트
+    updateHeaderIcons(isDarkTheme);
+
   } catch (error) {
     console.error('Error applying immediate theme:', error);
     applySystemTheme();
@@ -165,6 +168,35 @@ function applyThemeFromCache(theme) {
   // 테마 클래스 설정
   document.body.classList.toggle('dark-theme', theme.isDarkTheme);
   document.body.classList.toggle('light-theme', !theme.isDarkTheme);
+
+  // 헤더 아이콘 테마 업데이트
+  updateHeaderIcons(theme.isDarkTheme);
+}
+
+// 헤더 아이콘 테마 업데이트 함수
+function updateHeaderIcons(isDarkTheme) {
+  try {
+    const googleAppsDark = document.querySelector('.google-apps-icon-dark');
+    const googleAppsLight = document.querySelector('.google-apps-icon-light');
+    const flaskDark = document.querySelector('.flask-icon-dark');
+    const flaskLight = document.querySelector('.flask-icon-light');
+
+    if (isDarkTheme) {
+      // 다크 테마: 흰색 아이콘 표시
+      if (googleAppsDark) googleAppsDark.style.display = 'block';
+      if (googleAppsLight) googleAppsLight.style.display = 'none';
+      if (flaskDark) flaskDark.style.display = 'block';
+      if (flaskLight) flaskLight.style.display = 'none';
+    } else {
+      // 라이트 테마: 어두운 아이콘 표시
+      if (googleAppsDark) googleAppsDark.style.display = 'none';
+      if (googleAppsLight) googleAppsLight.style.display = 'block';
+      if (flaskDark) flaskDark.style.display = 'none';
+      if (flaskLight) flaskLight.style.display = 'block';
+    }
+  } catch (error) {
+    console.error('Error updating header icons:', error);
+  }
 }
 
 // 시스템 테마 적용 (fallback)
@@ -199,9 +231,10 @@ function applySystemTheme() {
     root.style.setProperty('--theme-scrollbar-thumb', 'rgba(232, 234, 237, 0.2)');
     root.style.setProperty('--theme-scrollbar-thumb-hover', 'rgba(232, 234, 237, 0.3)');
 
-    document.body.classList.add('dark-theme');
+        document.body.classList.add('dark-theme');
     document.body.classList.remove('light-theme');
-      } else {
+    updateHeaderIcons(true);
+  } else {
             document.body.style.setProperty('background', 'linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%)', 'important');
       document.body.style.setProperty('color', '#202124', 'important');
 
@@ -230,6 +263,7 @@ function applySystemTheme() {
 
     document.body.classList.add('light-theme');
     document.body.classList.remove('dark-theme');
+    updateHeaderIcons(false);
   }
 }
 
@@ -844,6 +878,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const searchInput = document.getElementById('searchInput');
       const dropdown = document.getElementById('searchHistoryDropdown');
       let highlightedIndex = -1;
+      let isNavigating = false; // 방향키 네비게이션 중인지 확인
 
       // 검색 기록 로드
       loadSearchHistory();
@@ -858,13 +893,20 @@ document.addEventListener('DOMContentLoaded', async () => {
                   // Ctrl+Enter: 새 탭에서 검색, 일반 Enter: 현재 탭에서 검색
                   const openInNewTab = event.ctrlKey || event.metaKey;
                   handleSearch(query, openInNewTab);
+                  highlightedIndex = -1; // 검색 실행 후 하이라이트 인덱스 리셋
               }
           } else if (event.key === 'ArrowDown') {
               event.preventDefault();
+              isNavigating = true;
               navigateHistory(1);
+              // 짧은 시간 후 네비게이션 플래그 해제
+              setTimeout(() => { isNavigating = false; }, 100);
           } else if (event.key === 'ArrowUp') {
               event.preventDefault();
+              isNavigating = true;
               navigateHistory(-1);
+              // 짧은 시간 후 네비게이션 플래그 해제
+              setTimeout(() => { isNavigating = false; }, 100);
           } else if (event.key === 'Escape') {
               hideSearchHistory();
           }
@@ -878,14 +920,21 @@ document.addEventListener('DOMContentLoaded', async () => {
       // 검색창 값 변경 시 필터링 및 자동완성
       let debounceTimer;
       searchInput.addEventListener('input', () => {
+          // 방향키 네비게이션 중이면 자동완성 요청하지 않음
+          if (isNavigating) {
+              return;
+          }
+
           const query = searchInput.value.trim();
 
           clearTimeout(debounceTimer);
           debounceTimer = setTimeout(async () => {
               if (query.length > 0) {
                   await loadSuggestionsAndHistory(query);
+                  highlightedIndex = -1; // 새로운 검색 시 하이라이트 인덱스 리셋
               } else {
                   await loadSearchHistory();
+                  highlightedIndex = -1; // 검색어 삭제 시 하이라이트 인덱스 리셋
               }
           }, 300); // 300ms 디바운스
       });
@@ -900,7 +949,10 @@ document.addEventListener('DOMContentLoaded', async () => {
               // 키보드 네비게이션
       function navigateHistory(direction) {
           const items = dropdown.querySelectorAll('.search-suggestion-item, .search-history-item');
-          if (items.length === 0) return;
+          if (items.length === 0) {
+              highlightedIndex = -1;
+              return;
+          }
 
           // 이전 하이라이트 제거
           items.forEach(item => item.classList.remove('highlighted'));
@@ -911,13 +963,22 @@ document.addEventListener('DOMContentLoaded', async () => {
           if (highlightedIndex >= items.length) highlightedIndex = 0;
 
           // 새 아이템 하이라이트
-          items[highlightedIndex].classList.add('highlighted');
+          if (highlightedIndex >= 0 && highlightedIndex < items.length) {
+              items[highlightedIndex].classList.add('highlighted');
 
-          // 검색창에 텍스트 입력
-          const textElement = items[highlightedIndex].querySelector('.search-suggestion-text, .search-history-text');
-          if (textElement) {
-              const query = textElement.textContent;
-              searchInput.value = query;
+              // 검색창에 텍스트 입력 (임시로 네비게이션 플래그 연장)
+              isNavigating = true;
+              const textElement = items[highlightedIndex].querySelector('.search-suggestion-text, .search-history-text');
+              if (textElement) {
+                  const query = textElement.textContent;
+                  searchInput.value = query;
+              }
+
+              // 하이라이트된 항목을 뷰포트에 스크롤
+              items[highlightedIndex].scrollIntoView({
+                  behavior: 'smooth',
+                  block: 'nearest'
+              });
           }
       }
   }
@@ -1144,6 +1205,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   function showSearchHistory() {
       const dropdown = document.getElementById('searchHistoryDropdown');
       dropdown.classList.add('visible');
+      highlightedIndex = -1; // 드롭다운 표시 시 하이라이트 인덱스 리셋
       loadSearchHistory();
   }
 
@@ -1151,6 +1213,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   function hideSearchHistory() {
       const dropdown = document.getElementById('searchHistoryDropdown');
       dropdown.classList.remove('visible');
+      highlightedIndex = -1; // 드롭다운 숨김 시 하이라이트 인덱스 리셋
   }
 
       // 검색 기록 필터링
@@ -1313,6 +1376,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       dropdown.innerHTML = html;
 
+      // DOM 재생성 후 하이라이트 인덱스 리셋
+      highlightedIndex = -1;
+
       // 이벤트 리스너 추가
       addSearchItemEventListeners();
   }
@@ -1323,6 +1389,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       if (history.length === 0) {
           dropdown.innerHTML = '<div class="search-history-empty">No search history</div>';
+          highlightedIndex = -1; // 빈 기록 시 하이라이트 인덱스 리셋
           return;
       }
 
@@ -1338,6 +1405,9 @@ document.addEventListener('DOMContentLoaded', async () => {
               </div>
           `;
       }).join('');
+
+      // DOM 재생성 후 하이라이트 인덱스 리셋
+      highlightedIndex = -1;
 
       // 이벤트 리스너 추가
       addSearchItemEventListeners();
@@ -1570,6 +1640,9 @@ document.addEventListener('DOMContentLoaded', async () => {
           document.body.classList.toggle('dark-theme', isDarkTheme);
           document.body.classList.toggle('light-theme', !isDarkTheme);
 
+          // 헤더 아이콘 테마 업데이트
+          updateHeaderIcons(isDarkTheme);
+
       } catch (error) {
           console.error('Error applying theme:', error);
           // 기본 테마 적용
@@ -1607,6 +1680,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       // 테마 클래스 설정
       document.body.classList.remove('dark-theme');
       document.body.classList.add('light-theme');
+
+      // 헤더 아이콘 테마 업데이트
+      updateHeaderIcons(false);
   }
 
   function isDarkMode(colors) {
@@ -1696,5 +1772,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       root.style.setProperty('--theme-is-dark', isDark ? '1' : '0');
       document.body.classList.toggle('dark-theme', isDark);
       document.body.classList.toggle('light-theme', !isDark);
+
+      // 헤더 아이콘 테마 업데이트
+      updateHeaderIcons(isDark);
   }
 });
