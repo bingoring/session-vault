@@ -1,184 +1,116 @@
-# SessionVault 🔐📋
+# SessionVault 🔐
 
-**Advanced Session Management & Browser Organization Chrome Extension**
+**Powerful Session Management Chrome Extension**
 
-SessionVault는 브라우저 세션을 안전하게 백업하고 복원할 수 있는 강력한 Chrome 확장프로그램입니다. 실수로 닫힌 탭을 복원하고, 시간대별로 자동 백업된 세션을 관리하며, 스마트한 탭 정렬 기능까지 제공합니다.
+SessionVault는 브라우저 세션을 안전하게 백업하고 복원할 수 있는 강력한 Chrome 확장프로그램입니다. 실수로 닫힌 탭을 즉시 복원하고, 자동 백업된 세션을 효율적으로 관리할 수 있습니다.
+
+## 다운로드 📦
+
+[![Chrome Web Store](https://img.shields.io/chrome-web-store/v/mmcddpjlkgbflhcfchenbjebkbhhfepa?style=for-the-badge&logo=googlechrome&logoColor=white&label=CHROME%20WEB%20STORE)](https://chromewebstore.google.com/detail/sessionvault/ibipemjdjplapcgbhnokhopkmonpkfcn)
 
 ## 주요 기능 ✨
 
-### 🔐 세션 백업 & 복원
-- **자동 세션 백업**: 시간 기반 또는 변경 감지 기반으로 세션 자동 저장
-- **실시간 닫힌 탭 추적**: 실수로 닫힌 탭과 그룹을 즉시 복원 가능
-- **선택적 복원**: 개별 탭, 그룹, 전체 세션 단위로 복원
-- **백업 범위 설정**: 현재 창만 또는 모든 창의 세션 저장
+### 🔐 강력한 세션 관리
+- **Recently Closed Sessions**: 실수로 닫힌 탭과 그룹을 즉시 복원
+- **Auto-Saved Sessions**: 시간 기반 또는 변경 감지 기반 자동 백업
+- **Manual Session Save**: 중요한 작업 세션을 수동으로 저장
+- **Selective Restoration**: 개별 탭, 그룹, 전체 세션 단위로 복원
+- **Smart Filtering**: 새탭, 내부 페이지 등 불필요한 탭 자동 제외
 
-### 🆕 새탭 페이지 경험
-- **통합 세션 관리**: 새탭에서 바로 세션 복원 및 관리
-- **Chrome 테마 완전 통합**: 사용자의 Chrome 테마에 자동으로 맞춰지는 UI
-- **다크/라이트 모드 지원**: 시스템 설정과 Chrome 테마에 따른 자동 적응
-- **새탭 오버라이드 옵션**: 설정에서 SessionVault 새탭 vs Chrome 기본 새탭 선택 가능
+### 🎯 편리한 접근 방식
+- **New Tab Integration**: 새탭에서 바로 세션 관리 및 복원
+- **Sidebar Panel**: 확장프로그램 아이콘 클릭으로 사이드바에서 세션 관리
+- **Current Tab Redirection**: 새탭에서 복원 시 현재 탭을 활용하여 자연스러운 경험
 
-### 🔍 통합 검색 기능
-- **Google 검색 통합**: 검색창에서 바로 Google 검색 또는 URL 입력
-- **검색 기록**: 이전 검색어 기록 및 자동완성
-- **실시간 검색 제안**: 입력하는 동안 검색 제안 표시
+### 🎨 세련된 사용자 경험
+- **Chrome Theme Integration**: 사용자의 Chrome 테마에 완벽 적응
+- **Dark/Light Mode**: 시스템 설정에 따른 자동 테마 전환
+- **Infinite Scroll**: 대량의 세션 데이터를 효율적으로 탐색 (최대 1000개)
+- **Loading Indicators**: 부드러운 로딩 애니메이션과 상태 표시
 
-### 🌐 바로가기 및 메뉴
-- **자주 방문하는 사이트**: Chrome TopSites API 기반 개인화된 바로가기
-- **Google Apps 메뉴**: Gmail, Drive, YouTube 등 주요 Google 서비스 빠른 접근
-- **파비콘 자동 로드**: 각 사이트의 파비콘으로 시각적 식별성 향상
+### 🔍 통합 검색 및 바로가기
+- **Google Search Integration**: 새탭에서 바로 검색 가능
+- **Search History & Suggestions**: 검색 기록 및 실시간 자동완성
+- **Top Sites**: 자주 방문하는 사이트 바로가기
+- **Google Apps Menu**: Gmail, Drive, YouTube 등 빠른 접근
 
-### 🎨 스마트 탭 정렬 & 그룹화
-- **도메인별 자동 그룹핑**: 웹사이트별로 탭을 자동으로 그룹화
-- **지능형 색상 추출**: 각 사이트의 favicon에서 주요 색상을 추출하여 그룹 색상 적용
-- **다양한 정렬 옵션**: 알파벳순, 최근 방문순, 사용자 지정 순서
-- **드래그 앤 드롭**: 도메인 순서 커스터마이징
-
-### 🪟 윈도우 관리
-- **키보드 단축키**: Ctrl+Shift+방향키로 윈도우 리사이징
-- **스마트 윈도우 배치**: 화면 분할 및 창 위치 자동 조정
+### 📋 부가 기능
+- **Smart Tab Grouping**: 도메인별 탭 자동 그룹화
+- **Window Management**: 키보드 단축키로 윈도우 배치
+- **Favicon Integration**: 사이트별 아이콘으로 시각적 구분
 
 ## 설치 방법 📥
 
-### 🌟 권장 방법: Chrome Web Store에서 설치
-1. [Chrome Web Store 링크](https://chromewebstore.google.com/detail/sessionvault/mmcddpjlkgbflhcfchenbjebkbhhfepa)를 클릭
-2. "Chrome에 추가" 버튼 클릭
-3. 확장프로그램 권한 승인
-4. 설치 완료! 🎉
+### Chrome Web Store (권장)
+1. [Chrome Web Store 링크](https://chromewebstore.google.com/detail/sessionvault/mmcddpjlkgbflhcfchenbjebkbhhfepa) 방문
+2. "Chrome에 추가" 클릭
+3. 권한 승인 후 설치 완료
 
-### 🔧 개발자 모드로 설치 (개발자용)
-1. Chrome 브라우저에서 `chrome://extensions/` 페이지로 이동
-2. 오른쪽 상단의 "개발자 모드" 활성화
+### 개발자 모드 (개발자용)
+1. `chrome://extensions/` 페이지 이동
+2. "개발자 모드" 활성화
 3. "압축해제된 확장 프로그램을 로드합니다" 클릭
-4. 이 프로젝트 폴더 선택
-
-## 권한 설명 🔐
-
-SessionVault가 요청하는 권한들과 사용 목적:
-
-- **tabs**: 탭 정보 읽기 및 그룹핑, 세션 백업 기능
-- **tabGroups**: 탭 그룹 생성 및 관리
-- **storage**: 세션 데이터 및 사용자 설정 저장
-- **topSites**: 자주 방문하는 사이트 바로가기 표시
-- **offscreen**: 안전한 환경에서 favicon 색상 분석
-- **system.display**: 윈도우 리사이징 기능
-- **호스트 권한들**: 파비콘 및 검색 제안 API 접근
-
-모든 데이터는 로컬에서만 처리되며 외부 서버로 전송되지 않습니다.
+4. 프로젝트 폴더 선택
 
 ## 사용 방법 🚀
 
-### 세션 관리
-1. **자동 백업**: 확장프로그램이 자동으로 세션을 백업
-2. **새탭에서 복원**: 새 탭을 열어 백업된 세션 확인 및 복원
-3. **팝업에서 빠른 복원**: 확장프로그램 아이콘 클릭하여 최근 세션 복원
-
-### 탭 정리
-1. 확장프로그램 아이콘 클릭
-2. 자동으로 도메인별 탭 그룹핑 실행
-3. 설정에서 정렬 방식 및 색상 옵션 조정
-
-### 새탭 페이지
-1. 새 탭을 열면 SessionVault 페이지가 자동으로 로드
-2. 검색창에서 Google 검색 또는 URL 입력
-3. 바로가기 클릭으로 자주 방문하는 사이트에 빠른 접근
-4. 최근 닫힌 세션에서 탭 복원
+### 세션 복원
+1. **새탭에서**: 새 탭을 열어 Recently Closed Sessions 또는 Auto-Saved Sessions에서 복원
+2. **사이드바에서**: 확장프로그램 아이콘 클릭하여 사이드바에서 세션 관리
+3. **개별 복원**: 특정 탭이나 그룹만 선택하여 복원
 
 ### 설정
-1. 확장프로그램 아이콘 우클릭 > "옵션" 또는 새탭 페이지의 설정 버튼
-2. 자동 백업 설정 조정 (시간 기반 vs 변경 감지 기반)
-3. 새탭 오버라이드 on/off 설정
-4. 탭 정렬 방식 및 그룹 설정
+1. 확장프로그램 아이콘 우클릭 > "옵션"
+2. **Auto-Save 설정**: 시간 기반(예: 60초마다) 또는 변경 감지 기반
+3. **New Tab Override**: SessionVault 새탭 사용 여부 설정
+4. **Detection Options**: 탭 생성, 삭제, URL 변경 감지 설정
 
-## 기술 스택 🛠️
+## 권한 설명 🔐
 
-- **JavaScript**: 메인 로직 구현
-- **Chrome Extension API**: 브라우저 확장 기능
-- **HTML/CSS**: 사용자 인터페이스
-- **Canvas API**: 이미지 색상 분석
-- **Chrome Theme API**: 테마 통합
-- **Chrome Storage API**: 세션 데이터 저장
-- **Chrome TopSites API**: 바로가기 사이트
+- **tabs**: 탭 정보 읽기 및 세션 백업
+- **storage**: 세션 데이터 및 설정 저장
+- **tabGroups**: 탭 그룹 관리
+- **sidePanel**: 사이드바 기능
+- **topSites**: 자주 방문하는 사이트 표시
+- **search**: Chrome 검색 API 사용
+
+모든 데이터는 사용자 기기에 로컬 저장되며, 외부로 전송되지 않습니다.
 
 ## 파일 구조 📂
 
 ```
 session-vault/
 ├── manifest.json          # 확장프로그램 설정
-├── background.js          # 백그라운드 스크립트 (세션 관리, 자동 저장)
-├── popup.html            # 팝업 UI
-├── popup.js              # 팝업 로직
-├── newtab.html           # 새탭 페이지 UI
-├── newtab.js             # 새탭 페이지 로직 (검색, 테마, 세션 복원)
-├── options.html          # 설정 페이지
-├── options.js            # 설정 로직
-├── offscreen.html        # 오프스크린 문서
-├── offscreen.js          # 색상 추출 로직
-└── icons/               # 확장프로그램 아이콘들
-    ├── icon-16.png      # 16x16 아이콘
-    ├── icon-32.png      # 32x32 아이콘
-    ├── icon-64.png      # 64x64 아이콘
-    ├── icon-128.png     # 128x128 아이콘
-    └── google/          # Google Apps 아이콘들
+├── background.js          # 백그라운드 스크립트 (세션 관리)
+├── popup.html/js          # 팝업 UI 및 로직
+├── newtab.html/js         # 새탭 페이지
+├── sidepanel.html/js      # 사이드바 패널
+├── options.html/js        # 설정 페이지
+├── offscreen.html/js      # 오프스크린 문서
+└── icons/                # 아이콘 파일들
 ```
-
-## 주요 알고리즘 🧠
-
-### 세션 백업 시스템
-1. **실시간 감지**: 탭 닫힘, 그룹 삭제, URL 변경 등을 실시간 감지
-2. **지능형 저장**: 중복 제거 및 우선순위 기반 세션 데이터 관리
-3. **자동 정리**: 오래된 백업 자동 정리 (최대 50개 자동 저장, 20개 닫힌 세션)
-4. **선택적 복원**: 개별 탭 또는 전체 그룹 단위로 복원 가능
-
-### 색상 추출 프로세스
-1. **Favicon 로드**: 각 탭의 favicon 이미지 획득
-2. **Canvas 분석**: 이미지를 canvas에 그려 픽셀 데이터 추출
-3. **색상 클러스터링**: 주요 색상들을 그룹화하여 대표 색상 선별
-4. **최적 색상 선택**: 명도, 채도, 대비를 고려한 최적 색상 결정
-5. **그룹 색상 적용**: Chrome Tab Groups API를 통해 색상 적용
-
-### 테마 적응 시스템
-1. **Chrome 테마 감지**: chrome.theme.getCurrent() API로 현재 테마 정보 획득
-2. **색상 분석**: 테마 색상의 밝기를 계산하여 다크/라이트 모드 판단
-3. **CSS 변수 설정**: 테마에 맞는 색상 팔레트를 CSS 변수로 동적 적용
-4. **실시간 적응**: 테마 변경 시 즉시 UI 업데이트
-
-## 기여하기 🤝
-
-1. 이 저장소를 Fork합니다
-2. 새로운 기능 브랜치를 생성합니다 (`git checkout -b feature/amazing-feature`)
-3. 변경사항을 커밋합니다 (`git commit -m 'Add amazing feature'`)
-4. 브랜치에 Push합니다 (`git push origin feature/amazing-feature`)
-5. Pull Request를 생성합니다
-
-## 라이선스 📄
-
-이 프로젝트는 MIT 라이선스 하에 있습니다.
 
 ## 버전 히스토리 📋
 
-- **v1.4.0**: SessionVault로 브랜드 변경 및 세션 관리 기능 강화
-  - 🔐 **세션 관리 중심**: 브랜딩을 세션 관리에 집중
-  - 📋 **향상된 세션 복원**: 더 안정적이고 빠른 세션 복원
-  - 🎨 **유지된 탭 정렬**: 기존 탭 정렬 및 그룹화 기능 완전 유지
-  - 🌙 **완전한 테마 통합**: Chrome 테마와 완전 통합
-  - 🔍 **통합 검색 기능**: Google 검색 및 검색 기록
-  - 🌐 **Google Apps 메뉴**: 주요 Google 서비스 빠른 접근
-  - ⚡ **성능 최적화**: 깜빡임 방지 및 로딩 속도 개선
+### v1.0.1 (최신)
+- 🎯 **무한 스크롤 페이지네이션**: 30개씩 로드, 최대 1000개 지원
+- 📱 **사이드바 기능 추가**: 확장프로그램 아이콘 클릭으로 사이드바에서 세션 관리
+- 🎨 **Session 복원 UX 개선**: newtab에서 복원 시 현재 탭 활용
+- 🔍 **검색 기능 통합**: Google 검색, 검색 기록, 자동완성 제안
+- 🌐 **Google Apps 메뉴**: 주요 Google 서비스 빠른 접근
+- 📱 **Top Sites 바로가기**: 자주 방문하는 사이트 표시
+- 🎨 **Chrome 테마 완전 통합**: 사용자 테마에 자동 적응
+- 🌙 **다크모드 깜빡임 수정**: 새탭 로드 시 시각적 문제 해결
+- 🚫 **스마트 탭 필터링**: 새탭, Chrome 내부 페이지 등 불필요한 탭 자동 제외
+- ✨ **헤더 아이콘 Hover 효과**: Flask, Google Apps 아이콘에 시각적 피드백 추가
+- 🐛 **Auto-save 로직 개선**: Time-based 모드 안정성 향상
 
-- **v1.3.1**: 도메인 표시 개선
-  - 🧹 TLD 제거: `.com`, `.co.kr`, `.io` 등 도메인 확장자 자동 제거
-  - 📋 더 깔끔한 탭 그룹 이름 표시
-
-- **v1.3.0**: 고급 정렬 옵션 추가
-  - 🔤 알파벳순 정렬 (기본)
-  - 🕒 최근 방문순 정렬
-  - ✋ 사용자 지정 순서 (드래그 앤 드롭)
-
-- **v1.0.0**: 초기 릴리즈
-  - 기본 탭 그룹핑 기능
-  - Favicon 색상 추출 및 적용
-  - 세션 관리 기능
+### v1.0.0
+- 🔐 **핵심 세션 관리 기능**: Recently Closed Sessions, Auto-Saved Sessions
+- 📋 **수동 세션 저장**: 중요한 작업 세션 보존
+- 🎯 **선택적 복원**: 탭, 그룹, 전체 세션 단위 복원
+- 📦 **기본 탭 그룹핑**: 도메인별 자동 그룹화
+- 🆕 **새탭 페이지**: Google 스타일 인터페이스로 세션 관리
 
 ---
 
