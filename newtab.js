@@ -288,93 +288,299 @@ document.addEventListener('DOMContentLoaded', async () => {
   // 바로가기 사이트 로드
   await loadTopSites();
 
+  // 페이지네이션 변수들
+  const ITEMS_PER_PAGE = 30;
+  const MAX_ITEMS = 10000;
+
+  let closedSessionsState = {
+      currentPage: 0,
+      totalLoaded: 0,
+      isLoading: false,
+      hasMore: true
+  };
+
+  let autoSavedSessionsState = {
+      currentPage: 0,
+      totalLoaded: 0,
+      isLoading: false,
+      hasMore: true
+  };
+
   // 일괄 제거 버튼 이벤트 리스너 추가
   document.querySelectorAll('.clear-all-btn').forEach(btn => {
       btn.addEventListener('click', handleClearAll);
   });
 
+  // 스크롤 이벤트 리스너 추가
+  addScrollListeners();
+
   // 초기 로드
   await loadAllSessions();
 
+  // 스크롤 이벤트 리스너 추가
+  function addScrollListeners() {
+      const closedSessionsContainer = document.getElementById('closedSessions');
+      const autoSavedSessionsContainer = document.getElementById('autoSavedSessions');
+
+      // Recently Closed Sessions 스크롤 리스너
+      closedSessionsContainer.addEventListener('scroll', () => {
+          if (isNearBottom(closedSessionsContainer) && !closedSessionsState.isLoading && closedSessionsState.hasMore) {
+              loadMoreClosedSessions();
+          }
+      });
+
+      // Auto-Saved Sessions 스크롤 리스너
+      autoSavedSessionsContainer.addEventListener('scroll', () => {
+          if (isNearBottom(autoSavedSessionsContainer) && !autoSavedSessionsState.isLoading && autoSavedSessionsState.hasMore) {
+              loadMoreAutoSavedSessions();
+          }
+      });
+  }
+
+  // 스크롤이 하단 근처인지 확인
+  function isNearBottom(element) {
+      const threshold = 100; // 하단에서 100px 이내
+      return element.scrollTop + element.clientHeight >= element.scrollHeight - threshold;
+  }
+
   async function loadAllSessions() {
       try {
+          // 상태 초기화
+          closedSessionsState = { currentPage: 0, totalLoaded: 0, isLoading: false, hasMore: true };
+          autoSavedSessionsState = { currentPage: 0, totalLoaded: 0, isLoading: false, hasMore: true };
+
           const [closedSessions, autoSavedSessions] = await Promise.all([
-              loadClosedSessions(),
-              loadAutoSavedSessions()
+              loadClosedSessions(0, ITEMS_PER_PAGE),
+              loadAutoSavedSessions(0, ITEMS_PER_PAGE)
           ]);
 
-          renderSessions(closedSessionsContainer, closedSessions, 'closed');
-          renderSessions(autoSavedSessionsContainer, autoSavedSessions, 'auto');
+          renderSessions(closedSessionsContainer, closedSessions, 'closed', true);
+          renderSessions(autoSavedSessionsContainer, autoSavedSessions, 'auto', true);
+
+          // 상태 업데이트
+          closedSessionsState.totalLoaded = closedSessions.length;
+          closedSessionsState.currentPage = 1;
+          closedSessionsState.hasMore = closedSessions.length === ITEMS_PER_PAGE;
+
+          autoSavedSessionsState.totalLoaded = autoSavedSessions.length;
+          autoSavedSessionsState.currentPage = 1;
+          autoSavedSessionsState.hasMore = autoSavedSessions.length === ITEMS_PER_PAGE;
       } catch (error) {
           console.error('Error loading sessions:', error);
       }
   }
 
-  async function loadClosedSessions() {
+  async function loadClosedSessions(startIndex = 0, limit = ITEMS_PER_PAGE) {
       try {
           const result = await chrome.storage.local.get(['closedSessions']);
-          return result.closedSessions || [];
+          const allSessions = result.closedSessions || [];
+
+          // 페이지네이션 적용
+          const endIndex = Math.min(startIndex + limit, allSessions.length, MAX_ITEMS);
+          return allSessions.slice(startIndex, endIndex);
       } catch (error) {
           console.error('Error loading closed sessions:', error);
           return [];
       }
   }
 
-  async function loadAutoSavedSessions() {
+  async function loadAutoSavedSessions(startIndex = 0, limit = ITEMS_PER_PAGE) {
       try {
           const result = await chrome.storage.local.get(['autoSavedSessions']);
-          return result.autoSavedSessions || [];
+          const allSessions = result.autoSavedSessions || [];
+
+          // 페이지네이션 적용
+          const endIndex = Math.min(startIndex + limit, allSessions.length, MAX_ITEMS);
+          return allSessions.slice(startIndex, endIndex);
       } catch (error) {
           console.error('Error loading auto-saved sessions:', error);
           return [];
       }
   }
 
-  function renderSessions(container, sessions, type) {
-      if (sessions.length === 0) {
-          container.innerHTML = `
-              <div class="no-sessions">
-                  ${type === 'closed' ? 'No recently closed sessions' : 'No auto-saved sessions'}
-              </div>
-          `;
+  // 더 많은 닫힌 세션 로드
+  async function loadMoreClosedSessions() {
+      if (closedSessionsState.isLoading || !closedSessionsState.hasMore || closedSessionsState.totalLoaded >= MAX_ITEMS) {
           return;
       }
 
-                      if (type === 'closed') {
-          // 닫힌 세션은 개별 아이템으로 렌더링
-          container.innerHTML = sessions.map(session => createClosedSessionItem(session)).join('');
+      closedSessionsState.isLoading = true;
+      showLoadingIndicator(closedSessionsContainer, 'closed');
 
-          // 닫힌 세션 아이템 이벤트 리스너
-          container.querySelectorAll('.closed-tab-item').forEach(item => {
-              item.addEventListener('click', handleClosedTabRestore);
+      try {
+          const startIndex = closedSessionsState.totalLoaded;
+          const newSessions = await loadClosedSessions(startIndex, ITEMS_PER_PAGE);
+
+          if (newSessions.length > 0) {
+              renderSessions(closedSessionsContainer, newSessions, 'closed', false);
+              closedSessionsState.totalLoaded += newSessions.length;
+              closedSessionsState.currentPage++;
+          }
+
+          // 더 이상 로드할 항목이 있는지 확인
+          closedSessionsState.hasMore = newSessions.length === ITEMS_PER_PAGE && closedSessionsState.totalLoaded < MAX_ITEMS;
+      } catch (error) {
+          console.error('Error loading more closed sessions:', error);
+      } finally {
+          closedSessionsState.isLoading = false;
+          hideLoadingIndicator(closedSessionsContainer);
+      }
+  }
+
+  // 더 많은 자동 저장 세션 로드
+  async function loadMoreAutoSavedSessions() {
+      if (autoSavedSessionsState.isLoading || !autoSavedSessionsState.hasMore || autoSavedSessionsState.totalLoaded >= MAX_ITEMS) {
+          return;
+      }
+
+      autoSavedSessionsState.isLoading = true;
+      showLoadingIndicator(autoSavedSessionsContainer, 'auto');
+
+      try {
+          const startIndex = autoSavedSessionsState.totalLoaded;
+          const newSessions = await loadAutoSavedSessions(startIndex, ITEMS_PER_PAGE);
+
+          if (newSessions.length > 0) {
+              renderSessions(autoSavedSessionsContainer, newSessions, 'auto', false);
+              autoSavedSessionsState.totalLoaded += newSessions.length;
+              autoSavedSessionsState.currentPage++;
+          }
+
+          // 더 이상 로드할 항목이 있는지 확인
+          autoSavedSessionsState.hasMore = newSessions.length === ITEMS_PER_PAGE && autoSavedSessionsState.totalLoaded < MAX_ITEMS;
+      } catch (error) {
+          console.error('Error loading more auto-saved sessions:', error);
+      } finally {
+          autoSavedSessionsState.isLoading = false;
+          hideLoadingIndicator(autoSavedSessionsContainer);
+      }
+  }
+
+  // 로딩 인디케이터 표시
+  function showLoadingIndicator(container, type) {
+      const loadingDiv = document.createElement('div');
+      loadingDiv.className = 'loading-indicator';
+      loadingDiv.innerHTML = `
+          <div class="loading-spinner"></div>
+          <div class="loading-text">Loading more ${type === 'closed' ? 'closed sessions' : 'auto-saved sessions'}...</div>
+      `;
+      container.appendChild(loadingDiv);
+  }
+
+  // 로딩 인디케이터 숨기기
+  function hideLoadingIndicator(container) {
+      const loadingIndicator = container.querySelector('.loading-indicator');
+      if (loadingIndicator) {
+          loadingIndicator.remove();
+      }
+  }
+
+  function renderSessions(container, sessions, type, isInitial = true) {
+      if (sessions.length === 0) {
+          if (isInitial) {
+              container.innerHTML = `
+                  <div class="no-sessions">
+                      ${type === 'closed' ? 'No recently closed sessions' : 'No auto-saved sessions'}
+                  </div>
+              `;
+          }
+          return;
+      }
+
+      // 초기 로드가 아닌 경우 기존 내용에 추가
+      if (!isInitial) {
+          // 로딩 인디케이터 제거
+          hideLoadingIndicator(container);
+
+          // 기존 "no-sessions" 메시지가 있으면 제거
+          const noSessionsMsg = container.querySelector('.no-sessions');
+          if (noSessionsMsg) {
+              noSessionsMsg.remove();
+          }
+      } else {
+          // 초기 로드인 경우 기존 내용 모두 제거
+          container.innerHTML = '';
+      }
+
+      if (type === 'closed') {
+          // 닫힌 세션은 개별 아이템으로 렌더링
+          const newItemsHtml = sessions.map(session => createClosedSessionItem(session)).join('');
+
+          if (isInitial) {
+              container.innerHTML = newItemsHtml;
+          } else {
+              container.insertAdjacentHTML('beforeend', newItemsHtml);
+          }
+
+          // 새로 추가된 닫힌 세션 아이템에만 이벤트 리스너 추가
+          const allItems = container.querySelectorAll('.closed-tab-item');
+          const allDeleteBtns = container.querySelectorAll('.delete-closed-btn');
+
+          // 기존 이벤트 리스너가 없는 새 아이템들만 이벤트 리스너 추가
+          allItems.forEach(item => {
+              if (!item.hasAttribute('data-listener-added')) {
+                  item.addEventListener('click', handleClosedTabRestore);
+                  item.setAttribute('data-listener-added', 'true');
+              }
           });
 
-          container.querySelectorAll('.delete-closed-btn').forEach(btn => {
-              btn.addEventListener('click', handleClosedItemDelete);
+          allDeleteBtns.forEach(btn => {
+              if (!btn.hasAttribute('data-listener-added')) {
+                  btn.addEventListener('click', handleClosedItemDelete);
+                  btn.setAttribute('data-listener-added', 'true');
+              }
           });
       } else {
           // 일반 세션은 기존 방식으로 렌더링
-          container.innerHTML = sessions.map(session => createSessionCard(session, type)).join('');
+          const newItemsHtml = sessions.map(session => createSessionCard(session, type)).join('');
 
-          // 이벤트 리스너 추가
-          container.querySelectorAll('.session-header').forEach(header => {
-              header.addEventListener('click', toggleSessionContent);
+          if (isInitial) {
+              container.innerHTML = newItemsHtml;
+          } else {
+              container.insertAdjacentHTML('beforeend', newItemsHtml);
+          }
+
+          // 새로 추가된 세션 카드들에만 이벤트 리스너 추가
+          const allHeaders = container.querySelectorAll('.session-header');
+          const allTabItems = container.querySelectorAll('.tab-item');
+          const allGroupItems = container.querySelectorAll('.group-item');
+          const allRestoreBtns = container.querySelectorAll('.restore-btn');
+          const allDeleteBtns = container.querySelectorAll('.delete-session-btn');
+
+          // 기존 이벤트 리스너가 없는 새 요소들만 이벤트 리스너 추가
+          allHeaders.forEach(header => {
+              if (!header.hasAttribute('data-listener-added')) {
+                  header.addEventListener('click', toggleSessionContent);
+                  header.setAttribute('data-listener-added', 'true');
+              }
           });
 
-          container.querySelectorAll('.tab-item').forEach(item => {
-              item.addEventListener('click', handleTabRestore);
+          allTabItems.forEach(item => {
+              if (!item.hasAttribute('data-listener-added')) {
+                  item.addEventListener('click', handleTabRestore);
+                  item.setAttribute('data-listener-added', 'true');
+              }
           });
 
-          container.querySelectorAll('.group-item').forEach(item => {
-              item.addEventListener('click', handleGroupRestore);
+          allGroupItems.forEach(item => {
+              if (!item.hasAttribute('data-listener-added')) {
+                  item.addEventListener('click', handleGroupRestore);
+                  item.setAttribute('data-listener-added', 'true');
+              }
           });
 
-          container.querySelectorAll('.restore-btn').forEach(btn => {
-              btn.addEventListener('click', handleSessionRestore);
+          allRestoreBtns.forEach(btn => {
+              if (!btn.hasAttribute('data-listener-added')) {
+                  btn.addEventListener('click', handleSessionRestore);
+                  btn.setAttribute('data-listener-added', 'true');
+              }
           });
 
-          container.querySelectorAll('.delete-session-btn').forEach(btn => {
-              btn.addEventListener('click', handleSessionDelete);
+          allDeleteBtns.forEach(btn => {
+              if (!btn.hasAttribute('data-listener-added')) {
+                  btn.addEventListener('click', handleSessionDelete);
+                  btn.setAttribute('data-listener-added', 'true');
+              }
           });
       }
   }

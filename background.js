@@ -468,17 +468,6 @@ chrome.tabs.onRemoved.addListener(async (tabId, removeInfo) => {
       const { autoSaveAllWindows } = await chrome.storage.sync.get(['autoSaveAllWindows']);
       await autoSaveCurrentSession(autoSaveAllWindows === true);
     }
-
-    // 기존 자동 저장 로직도 유지 (시간 기반인 경우)
-    if (autoSaveSettings.enabled && autoSaveSettings.trigger === "time") {
-      const { autoSaveAllWindows } = await chrome.storage.sync.get(['autoSaveAllWindows']);
-
-      // 먼저 현재 상태를 자동 저장하여 최신 정보 확보
-      await autoSaveCurrentSession(autoSaveAllWindows === true);
-
-      // 모든 탭을 개별 탭으로 저장
-      await saveClosedTab(tabId, removeInfo.windowId, removeInfo.isWindowClosing);
-    }
   } catch (error) {
     console.error("Error in tab close handler:", error);
   }

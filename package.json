@@ -1,7 +1,7 @@
 {
   "name": "session-vault",
-  "version": "1.0.0",
-  "description": "Powerful session management Chrome extension - Backup, restore, and organize your browsing sessions with smart tab grouping",
+  "version": "1.0.1",
+  "description": "Powerful session management Chrome extension - Backup, restore, and organize your browsing sessions",
   "main": "background.js",
   "scripts": {
     "build": "npm run package",

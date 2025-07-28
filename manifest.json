@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "SessionVault",
-  "version": "1.0.0",
-  "description": "Powerful session management extension - Backup, restore, and organize your browsing sessions with smart tab grouping",
+  "version": "1.0.1",
+  "description": "Powerful session management extension - Backup, restore, and organize your browsing sessions",
   "permissions": [
     "offscreen",
     "tabs",
