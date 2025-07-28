@@ -68,13 +68,13 @@ jobs:
           exit 1
         fi
 
-        # chrome-webstore-upload upload \
-        #   --source extension.zip \
-        #   --extension-id "$EXTENSION_ID" \
-        #   --client-id "$CLIENT_ID" \
-        #   --client-secret "$CLIENT_SECRET" \
-        #   --refresh-token "$REFRESH_TOKEN" \
-        #   --auto-publish
+        chrome-webstore-upload upload \
+          --source extension.zip \
+          --extension-id "$EXTENSION_ID" \
+          --client-id "$CLIENT_ID" \
+          --client-secret "$CLIENT_SECRET" \
+          --refresh-token "$REFRESH_TOKEN" \
+          --auto-publish
 
     - name: Cleanup
       run: |
