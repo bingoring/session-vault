@@ -1,14 +1,13 @@
 {
   "manifest_version": 3,
   "name": "SessionVault",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Powerful session management extension - Backup, restore, and organize your browsing sessions",
   "permissions": [
     "offscreen",
     "tabs",
     "storage",
     "tabGroups",
-    "system.display",
     "topSites",
     "search",
     "sidePanel"
@@ -49,31 +48,5 @@
       "https://api.allorigins.win/*",
       "https://suggestqueries.google.com/*",
       "https://clients1.google.com/*"
-  ],
-  "commands": {
-    "resize-left": {
-      "suggested_key": {
-        "default": "Ctrl+Shift+Left"
-      },
-      "description": "Move window to the left"
-    },
-    "resize-right": {
-      "suggested_key": {
-        "default": "Ctrl+Shift+Right"
-      },
-      "description": "Move window to the right"
-    },
-    "resize-up": {
-      "suggested_key": {
-        "default": "Ctrl+Shift+Up"
-      },
-      "description": "Move window to the top"
-    },
-    "resize-down": {
-      "suggested_key": {
-        "default": "Ctrl+Shift+Down"
-      },
-      "description": "Move window to the bottom"
-    }
-  }
+  ]
 }
