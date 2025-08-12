@@ -4,7 +4,6 @@
   "version": "1.0.2",
   "description": "Powerful session management extension - Backup, restore, and organize your browsing sessions",
   "permissions": [
-    "offscreen",
     "tabs",
     "storage",
     "tabGroups",

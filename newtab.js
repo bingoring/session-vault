@@ -14,7 +14,7 @@ let isOverrideEnabled = true;
     }
 
     const settings = await chrome.storage.sync.get(['newTabOverride']);
-    if (settings.newTabOverride !== true) {
+    if (settings.newTabOverride === false) {
       isOverrideEnabled = false;
       // 리다이렉트 플래그 설정
       sessionStorage.setItem('sessionvault_redirecting', 'true');
